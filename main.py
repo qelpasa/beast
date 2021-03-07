@@ -59,7 +59,8 @@ class App:
         self.gameSizeX = 256
         self.gameSizeY = 120
         self.nOfAllWalls = 0
-        self.nOfWalls = 2
+        self.nOfWalls = 41
+        self.nOfSideWalls = 0
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
         self.walls = []
@@ -98,19 +99,11 @@ class App:
             elif pyxel.btnp(pyxel.KEY_RIGHT):
                 self.player.x += self.player.w
         if pyxel.btnp(pyxel.KEY_SPACE):
-            a += 1
-            print("x ", self.walls[0].x, " y ", self.walls[0].y)
-            print("x ", self.walls[1].x, " y ", self.walls[1].y)
-            print(a)
-            #for i in range(self.nOfAllWalls):
+            self.walls[self.nOfSideWalls].moveWall(Direction.LEFT)
 
 
     def initlializeWalls(self):
-        for i in range(self.nOfWalls):
-            Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
-            Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
-            self.walls.append(Wall(Xrand * 8, Yrand * 8))
-
+        self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8)
         for i in range(int(self.gameSizeX / 8)):
             self.walls.append(Wall(i * 8, 0))
             self.walls.append(Wall(i * 8, self.gameSizeY - 8))
@@ -119,8 +112,14 @@ class App:
             self.walls.append(Wall(0, i * 8))
             self.walls.append(Wall(self.gameSizeX - 8, i * 8))
 
+        for i in range(self.nOfWalls):
+            Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
+            Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            self.walls.append(Wall(Xrand * 8, Yrand * 8))
+
+        self.nOfSideWalls = self.nOfAllWalls - self.nOfWalls
+
     def drawWalls(self):
-        self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8)
         for i in range(self.nOfAllWalls):
             self.walls[i].draw()
 
@@ -145,12 +144,14 @@ class App:
             direction = Direction.RIGHT
 
         for i in range(self.nOfAllWalls):
-            if (
-                    self.walls[i].x == x and
-                    self.walls[i].y == y
-            ):
-                self.checkCollision(self.walls[i])
-                self.walls[i].moveWall(direction)
+            if self.walls[i].x == x and self.walls[i].y == y:
+                print()
+                print(i)
+                if i < self.nOfSideWalls:
+                    return True
+                else:
+                    self.checkCollision(self.walls[i])
+                    self.walls[i].moveWall(direction)
         return False
 
 
