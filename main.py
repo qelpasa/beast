@@ -32,6 +32,15 @@ class Wall:
             is_intersected = True
         return is_intersected
 
+    def moveWall(self, direction):
+        if direction == Direction.LEFT:
+            self.x -= self.w
+        if direction == Direction.RIGHT:
+            self.x += self.w
+        if direction == Direction.UP:
+            self.y -= self.h
+        if direction == Direction.DOWN:
+            self.y += self.h
 
 class Player:
     def __init__(self, x, y):
@@ -113,23 +122,29 @@ class App:
         x = self.player.x
         y = self.player.y
 
-        collision = False
         if pyxel.btnp(pyxel.KEY_DOWN):
             y += self.player.h
+            direction = Direction.DOWN
+
         elif pyxel.btnp(pyxel.KEY_UP):
             y -= self.player.h
+            direction = Direction.UP
+
         elif pyxel.btnp(pyxel.KEY_LEFT):
             x -= self.player.w
+            direction = Direction.LEFT
+
         elif pyxel.btnp(pyxel.KEY_RIGHT):
             x += self.player.w
+            direction = Direction.RIGHT
 
         for i in range(self.nOfAllWalls):
             if (
                     self.walls[i].x == x and
                     self.walls[i].y == y
             ):
-                collision = True
-        return collision
+                self.walls[i].moveWall(direction)
+        return False
 
 
 App()
