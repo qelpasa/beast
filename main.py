@@ -59,7 +59,7 @@ class App:
         self.gameSizeX = 256
         self.gameSizeY = 120
         self.nOfAllWalls = 0
-        self.nOfWalls = 40
+        self.nOfWalls = 2
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
         self.walls = []
@@ -87,7 +87,8 @@ class App:
         self.player.draw()
 
     def movePlayer(self):
-        if not self.checkCollision():
+        a = 0
+        if not self.checkCollision(self.player):
             if pyxel.btnp(pyxel.KEY_DOWN):
                 self.player.y += self.player.h
             elif pyxel.btnp(pyxel.KEY_UP):
@@ -97,7 +98,12 @@ class App:
             elif pyxel.btnp(pyxel.KEY_RIGHT):
                 self.player.x += self.player.w
         if pyxel.btnp(pyxel.KEY_SPACE):
-            print()
+            a += 1
+            print("x ", self.walls[0].x, " y ", self.walls[0].y)
+            print("x ", self.walls[1].x, " y ", self.walls[1].y)
+            print(a)
+            #for i in range(self.nOfAllWalls):
+
 
     def initlializeWalls(self):
         for i in range(self.nOfWalls):
@@ -118,24 +124,24 @@ class App:
         for i in range(self.nOfAllWalls):
             self.walls[i].draw()
 
-    def checkCollision(self):
-        x = self.player.x
-        y = self.player.y
+    def checkCollision(self, obj):
+        x = obj.x
+        y = obj.y
 
         if pyxel.btnp(pyxel.KEY_DOWN):
-            y += self.player.h
+            y += obj.h
             direction = Direction.DOWN
 
         elif pyxel.btnp(pyxel.KEY_UP):
-            y -= self.player.h
+            y -= obj.h
             direction = Direction.UP
 
         elif pyxel.btnp(pyxel.KEY_LEFT):
-            x -= self.player.w
+            x -= obj.w
             direction = Direction.LEFT
 
         elif pyxel.btnp(pyxel.KEY_RIGHT):
-            x += self.player.w
+            x += obj.w
             direction = Direction.RIGHT
 
         for i in range(self.nOfAllWalls):
@@ -143,6 +149,7 @@ class App:
                     self.walls[i].x == x and
                     self.walls[i].y == y
             ):
+                self.checkCollision(self.walls[i])
                 self.walls[i].moveWall(direction)
         return False
 
