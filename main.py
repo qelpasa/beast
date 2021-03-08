@@ -97,7 +97,7 @@ class App:
         self.timeLastFrame = timeThisFrame
         self.timeSinceLastMove += self.dt
 
-        if self.timeSinceLastMove >= 0.3:  # speed
+        if self.timeSinceLastMove >= 0.1:  # speed
             self.moveEnemy()
             self.timeSinceLastMove = 0
 
@@ -108,7 +108,7 @@ class App:
         self.enemy.draw()
 
     def movePlayer(self):
-        if not self.checkCollision(self.player, "player"):
+        if not self.checkCollision(self.player):
             if pyxel.btnp(pyxel.KEY_DOWN):
                 self.player.y += self.player.h
             elif pyxel.btnp(pyxel.KEY_UP):
@@ -163,7 +163,7 @@ class App:
         for i in range(self.nOfAllWalls):
             self.walls[i].draw()
 
-    def checkCollision(self, obj, whatObj, EnemyDirection=-1):
+    def checkCollision(self, obj, whatObj="notEnemy", EnemyDirection=-1):
         x = obj.x
         y = obj.y
         print(x, " ", y)
@@ -197,7 +197,7 @@ class App:
                     if i < self.nOfSideWalls:
                         return True
                     else:
-                        if self.checkCollision(self.walls[i], "wall"):
+                        if self.checkCollision(self.walls[i]):
                             return True
                         else:
                             self.walls[i].moveWall(direction)
