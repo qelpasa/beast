@@ -58,23 +58,26 @@ class Player:
 
 class App:
     def __init__(self):
+        self.playerInitPos = 32
         self.gameSizeX = 256
         self.gameSizeY = 120
-        self.nOfAllWalls = 0
         self.nOfWalls = 41
+        self.nOfAllWalls = 0
         self.nOfSideWalls = 0
+
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
-        self.walls = []
+
         self.initlializeWalls()
-        self.player = Player(32, 32)
+        self.player = Player(self.playerInitPos, self.playerInitPos)
         self.timeLastFrame = time.time()
         self.dt = 0
         self.timeSinceLastMove = 0
         pyxel.run(self.update, self.draw)
 
     def update(self):
-
+        if pyxel.btnp(pyxel.KEY_R):
+            self.initlializeWalls()
         self.movePlayer()
 
         timeThisFrame = time.time()
@@ -90,7 +93,6 @@ class App:
         self.player.draw()
 
     def movePlayer(self):
-        a = 0
         if not self.checkCollision(self.player):
             if pyxel.btnp(pyxel.KEY_DOWN):
                 self.player.y += self.player.h
@@ -104,6 +106,9 @@ class App:
             self.walls[self.nOfSideWalls].moveWall(Direction.LEFT)
 
     def initlializeWalls(self):
+        self.player = Player(self.playerInitPos, self.playerInitPos)
+        self.walls = []
+
         self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8)
         for i in range(int(self.gameSizeX / 8)):
             self.walls.append(Wall(i * 8, 0))
@@ -113,11 +118,21 @@ class App:
             self.walls.append(Wall(0, i * 8))
             self.walls.append(Wall(self.gameSizeX - 8, i * 8))
 
+        wallsToDelete = 0
         for i in range(self.nOfWalls):
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
-            self.walls.append(Wall(Xrand * 8, Yrand * 8))
 
+            playerPos = int(self.playerInitPos / 8)
+
+            if Xrand == playerPos and Yrand == playerPos:
+                wallsToDelete += 1
+            else:
+                self.walls.append(Wall(Xrand * 8, Yrand * 8))
+                print(Xrand, " ", Yrand)
+
+        self.nOfAllWalls -= wallsToDelete
+        self.nOfWalls -= wallsToDelete
         self.nOfSideWalls = self.nOfAllWalls - self.nOfWalls
 
     def drawWalls(self):
@@ -146,8 +161,6 @@ class App:
 
         for i in range(self.nOfAllWalls):
             if self.walls[i].x == x and self.walls[i].y == y:
-                print()
-                print(i)
                 if i < self.nOfSideWalls:
                     return True
                 else:
