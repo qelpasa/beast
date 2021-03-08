@@ -23,17 +23,6 @@ class Wall:
     def draw(self):
         pyxel.blt(self.x, self.y, 0, 16, 0, self.w, self.h)
 
-    def intersects(self, u, v, w, h):
-        is_intersected = False
-        if (
-                u + w > self.x and
-                self.x + self.w > u and
-                v + h > self.y and
-                self.y + self.h > v
-        ):
-            is_intersected = True
-        return is_intersected
-
     def moveWall(self, direction):
         if direction == Direction.LEFT:
             self.x -= self.w
@@ -56,6 +45,27 @@ class Player:
         pyxel.blt(self.x, self.y, 0, 0, 0, self.w, self.h)
 
 
+class Enemy:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.w = 8
+        self.h = 8
+
+    def draw(self):
+        pyxel.blt(self.x, self.y, 0, 8, 0, self.w, self.h)
+
+    def moveEnemy(self, direction):
+        if direction == Direction.LEFT:
+            self.x -= self.w
+        if direction == Direction.RIGHT:
+            self.x += self.w
+        if direction == Direction.UP:
+            self.y -= self.h
+        if direction == Direction.DOWN:
+            self.y += self.h
+
+
 class App:
     def __init__(self):
         self.playerInitPos = 32
@@ -69,28 +79,33 @@ class App:
         pyxel.load("assets/resources.pyres.pyxres")
 
         self.initlializeWalls()
-        self.player = Player(self.playerInitPos, self.playerInitPos)
+
         self.timeLastFrame = time.time()
         self.dt = 0
         self.timeSinceLastMove = 0
+
         pyxel.run(self.update, self.draw)
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_R):
             self.initlializeWalls()
+
         self.movePlayer()
 
         timeThisFrame = time.time()
         self.dt = timeThisFrame - self.timeLastFrame
         self.timeLastFrame = timeThisFrame
         self.timeSinceLastMove += self.dt
+
         if self.timeSinceLastMove >= 1:
+            self.moveEnemy()
             self.timeSinceLastMove = 0
 
     def draw(self):
         pyxel.cls(0)
         self.drawWalls()
         self.player.draw()
+        self.enemy.draw()
 
     def movePlayer(self):
         if not self.checkCollision(self.player):
@@ -103,10 +118,9 @@ class App:
             elif pyxel.btnp(pyxel.KEY_RIGHT):
                 self.player.x += self.player.w
         if pyxel.btnp(pyxel.KEY_SPACE):
-            self.walls[self.nOfSideWalls].moveWall(Direction.LEFT)
+            print("x")
 
     def initlializeWalls(self):
-        self.player = Player(self.playerInitPos, self.playerInitPos)
         self.walls = []
 
         self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8)
@@ -134,6 +148,15 @@ class App:
         self.nOfAllWalls -= wallsToDelete
         self.nOfWalls -= wallsToDelete
         self.nOfSideWalls = self.nOfAllWalls - self.nOfWalls
+
+        self.player = Player(self.playerInitPos, self.playerInitPos)
+        self.enemy = Enemy(48, 48)
+
+    def initializeEnemy(self):
+        print(" ")
+
+    def moveEnemy(self):
+        self.enemy.moveEnemy(random.choice(list(Direction)))
 
     def drawWalls(self):
         for i in range(self.nOfAllWalls):
