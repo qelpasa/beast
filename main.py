@@ -4,6 +4,8 @@ import time
 import random
 
 
+# paste into terminal to enter pyxel editor
+# pyxeleditor resources.pyres.pyxres
 class Direction(enum.Enum):
     RIGHT = 0
     LEFT = 1
@@ -42,6 +44,7 @@ class Wall:
         if direction == Direction.DOWN:
             self.y += self.h
 
+
 class Player:
     def __init__(self, x, y):
         self.x = x
@@ -51,7 +54,6 @@ class Player:
 
     def draw(self):
         pyxel.blt(self.x, self.y, 0, 0, 0, self.w, self.h)
-
 
 
 class App:
@@ -101,7 +103,6 @@ class App:
         if pyxel.btnp(pyxel.KEY_SPACE):
             self.walls[self.nOfSideWalls].moveWall(Direction.LEFT)
 
-
     def initlializeWalls(self):
         self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8)
         for i in range(int(self.gameSizeX / 8)):
@@ -150,8 +151,10 @@ class App:
                 if i < self.nOfSideWalls:
                     return True
                 else:
-                    self.checkCollision(self.walls[i])
-                    self.walls[i].moveWall(direction)
+                    if self.checkCollision(self.walls[i]):
+                        return True
+                    else:
+                        self.walls[i].moveWall(direction)
         return False
 
 
