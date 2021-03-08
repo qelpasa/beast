@@ -97,7 +97,7 @@ class App:
         self.timeLastFrame = timeThisFrame
         self.timeSinceLastMove += self.dt
 
-        if self.timeSinceLastMove >= 1:
+        if self.timeSinceLastMove >= 0.3:  # speed
             self.moveEnemy()
             self.timeSinceLastMove = 0
 
@@ -108,7 +108,7 @@ class App:
         self.enemy.draw()
 
     def movePlayer(self):
-        if not self.checkCollision(self.player):
+        if not self.checkCollision(self.player, "player"):
             if pyxel.btnp(pyxel.KEY_DOWN):
                 self.player.y += self.player.h
             elif pyxel.btnp(pyxel.KEY_UP):
@@ -143,7 +143,6 @@ class App:
                 wallsToDelete += 1
             else:
                 self.walls.append(Wall(Xrand * 8, Yrand * 8))
-                print(Xrand, " ", Yrand)
 
         self.nOfAllWalls -= wallsToDelete
         self.nOfWalls -= wallsToDelete
@@ -152,45 +151,57 @@ class App:
         self.player = Player(self.playerInitPos, self.playerInitPos)
         self.enemy = Enemy(48, 48)
 
-    def initializeEnemy(self):
-        print(" ")
-
     def moveEnemy(self):
-        self.enemy.moveEnemy(random.choice(list(Direction)))
+        move = random.choice(list(Direction))
+
+        if self.checkCollision(self.enemy, "enemy", EnemyDirection=move):
+            self.enemy.moveEnemy(move)
+
+        # for i in range(self.nOfAllWalls):
 
     def drawWalls(self):
         for i in range(self.nOfAllWalls):
             self.walls[i].draw()
 
-    def checkCollision(self, obj):
+    def checkCollision(self, obj, whatObj, EnemyDirection=-1):
         x = obj.x
         y = obj.y
-
-        if pyxel.btnp(pyxel.KEY_DOWN):
+        print(x, " ", y)
+        if pyxel.btnp(pyxel.KEY_DOWN) or EnemyDirection == Direction.DOWN:
             y += obj.h
             direction = Direction.DOWN
 
-        elif pyxel.btnp(pyxel.KEY_UP):
+        elif pyxel.btnp(pyxel.KEY_UP) or EnemyDirection == Direction.UP:
             y -= obj.h
             direction = Direction.UP
 
-        elif pyxel.btnp(pyxel.KEY_LEFT):
+        elif pyxel.btnp(pyxel.KEY_LEFT) or EnemyDirection == Direction.LEFT:
             x -= obj.w
             direction = Direction.LEFT
 
-        elif pyxel.btnp(pyxel.KEY_RIGHT):
+        elif pyxel.btnp(pyxel.KEY_RIGHT) or EnemyDirection == Direction.RIGHT:
             x += obj.w
             direction = Direction.RIGHT
 
-        for i in range(self.nOfAllWalls):
-            if self.walls[i].x == x and self.walls[i].y == y:
-                if i < self.nOfSideWalls:
-                    return True
-                else:
-                    if self.checkCollision(self.walls[i]):
+
+        if whatObj == "enemy":
+            print(x, " ", y)
+            print(EnemyDirection)
+            for i in range(self.nOfAllWalls):
+                if self.walls[i].x == x and self.walls[i].y == y:
+                    return False
+            return True
+        else:
+            for i in range(self.nOfAllWalls):
+                if self.walls[i].x == x and self.walls[i].y == y:
+                    if i < self.nOfSideWalls:
                         return True
                     else:
-                        self.walls[i].moveWall(direction)
+                        if self.checkCollision(self.walls[i], "wall"):
+                            return True
+                        else:
+                            self.walls[i].moveWall(direction)
+
         return False
 
 
