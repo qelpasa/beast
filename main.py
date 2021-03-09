@@ -6,6 +6,7 @@ import random
 
 # paste into terminal to enter pyxel editor
 # pyxeleditor resources.pyres.pyxres
+
 class Direction(enum.Enum):
     RIGHT = 0
     LEFT = 1
@@ -78,9 +79,11 @@ class App:
         self.nOfHardWalls = 9
         self.nOfAllWalls = 0
         self.nOfSideWalls = 0
-        self.nOfEnemies = 4
+        self.nOfEnemiesBuff = 2
+        self.nOfEnemies = self.nOfEnemiesBuff
         self.parity = 1
         self.endGame = False
+        self.speed = 1
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
@@ -95,10 +98,9 @@ class App:
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_R):
-            self.nOfEnemies = 4
+            self.nOfEnemies = self.nOfEnemiesBuff
             self.initializeObjects()
             self.endGame = False
-
 
         self.movePlayer()
         self.executeEnemies()
@@ -107,10 +109,10 @@ class App:
         self.timeLastFrame = timeThisFrame
         self.timeSinceLastMove += self.dt
 
-        if self.timeSinceLastMove >= 0.5:  # speed
+        if self.timeSinceLastMove >= self.speed:
 
             for i in range(self.nOfEnemies):
-                if self.parity == 3:  # every third move make "intelligent" move
+                if self.parity == 2:  # every second move make "intelligent" move
                     self.moveEnemy(i, moveTowardsPlayer=True)
                     self.parity = 1
                 else:
@@ -118,7 +120,6 @@ class App:
                     self.parity += 1
 
                 self.timeSinceLastMove = 0
-
 
     def draw(self):
         if self.endGame:
@@ -131,7 +132,6 @@ class App:
             for i in range(self.nOfEnemies):
                 self.enemy[i].draw()
 
-
     def movePlayer(self):
         if not self.checkCollision(self.player):
             if pyxel.btnp(pyxel.KEY_DOWN):
@@ -142,8 +142,16 @@ class App:
                 self.player.x -= self.player.w
             elif pyxel.btnp(pyxel.KEY_RIGHT):
                 self.player.x += self.player.w
+
+            for i in range(self.nOfEnemies):
+                if self.player.x == self.enemy[i].x and self.player.y == self.enemy[i].y:
+                    self.endGame = True
+
+
+
         if pyxel.btnp(pyxel.KEY_SPACE):
-            print("x")
+            self.enemy.pop(0)
+            self.nOfEnemies -= 1
 
     def initializeObjects(self):  # walls, enemies and player
         self.walls = []
@@ -215,6 +223,8 @@ class App:
 
         if self.checkCollision(self.enemy[whichEnemy], "enemy", EnemyDirection=move):
             self.enemy[whichEnemy].moveEnemy(move)
+        else:
+            self.moveEnemy(whichEnemy)
 
         # check for losing the game
         for i in range(self.nOfEnemies):
@@ -277,8 +287,19 @@ class App:
                             self.nOfEnemies -= 1
                             continueLoops = False
                             break
+        if self.nOfEnemies == 0:
+            self.NextLevel()
 
     def GameOver(self):
         pyxel.blt(90, 50, 0, 0, 8, 72, 16)
+
+    def NextLevel(self):
+        print(self.level)
+        if self.nOfEnemiesBuff < 6:
+            self.nOfEnemiesBuff += 1
+        self.nOfEnemies = self.nOfEnemiesBuff
+        self.initializeObjects()
+        self.endGame = False
+        self.speed *= 0.85
 
 App()
