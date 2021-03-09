@@ -6,6 +6,9 @@ import random
 
 # paste into terminal to enter pyxel editor
 # pyxeleditor resources.pyres.pyxres
+# TODO
+# trapped enemy causes error
+# level name on screen
 
 class Direction(enum.Enum):
     RIGHT = 0
@@ -81,11 +84,12 @@ class App:
         self.nOfSideWalls = 0
         self.nOfEnemiesBuff = 2
         self.nOfEnemies = self.nOfEnemiesBuff
+        self.maxNumOfEnemies = 7
         self.parity = 1
         self.endGame = False
         self.speed = 1
 
-        pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
+        pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="BEAST", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
 
         self.initializeObjects()
@@ -97,11 +101,6 @@ class App:
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        if pyxel.btnp(pyxel.KEY_R):
-            self.nOfEnemies = self.nOfEnemiesBuff
-            self.initializeObjects()
-            self.endGame = False
-
         self.movePlayer()
         self.executeEnemies()
         timeThisFrame = time.time()
@@ -120,6 +119,10 @@ class App:
                     self.parity += 1
 
                 self.timeSinceLastMove = 0
+
+        if pyxel.btnp(pyxel.KEY_R):
+            self.initializeObjects()
+            self.endGame = False
 
     def draw(self):
         if self.endGame:
@@ -146,8 +149,6 @@ class App:
             for i in range(self.nOfEnemies):
                 if self.player.x == self.enemy[i].x and self.player.y == self.enemy[i].y:
                     self.endGame = True
-
-
 
         if pyxel.btnp(pyxel.KEY_SPACE):
             self.enemy.pop(0)
@@ -193,6 +194,7 @@ class App:
 
         self.player = Player(self.playerInitPos, self.playerInitPos)
 
+        self.nOfEnemies = self.nOfEnemiesBuff
         self.enemy = []
 
         while len(self.enemy) < self.nOfEnemies:
@@ -294,12 +296,11 @@ class App:
         pyxel.blt(90, 50, 0, 0, 8, 72, 16)
 
     def NextLevel(self):
-        print(self.level)
-        if self.nOfEnemiesBuff < 6:
+        if self.nOfEnemiesBuff < self.maxNumOfEnemies:
             self.nOfEnemiesBuff += 1
-        self.nOfEnemies = self.nOfEnemiesBuff
         self.initializeObjects()
         self.endGame = False
         self.speed *= 0.85
+
 
 App()
