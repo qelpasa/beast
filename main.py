@@ -78,6 +78,7 @@ class App:
         self.nOfHardWalls = 9
         self.nOfAllWalls = 0
         self.nOfSideWalls = 0
+        self.parity = 1
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
@@ -102,7 +103,13 @@ class App:
         self.timeSinceLastMove += self.dt
 
         if self.timeSinceLastMove >= 0.1:  # speed
-            self.moveEnemy()
+            if self.parity == 1:   # every second move make "intelligent" move
+                self.moveEnemy()
+                self.parity = 0
+            else:
+                self.moveEnemy(moveTowardsPlayer=True)
+                self.parity = 1
+
             self.timeSinceLastMove = 0
 
     def draw(self):
@@ -165,13 +172,24 @@ class App:
         self.player = Player(self.playerInitPos, self.playerInitPos)
         self.enemy = Enemy(48, 48)
 
-    def moveEnemy(self):
-        move = random.choice(list(Direction))
+    def moveEnemy(self, moveTowardsPlayer=False):
+        if moveTowardsPlayer:
+            verticalOrHorizontalMove = random.randint(0, 1)
+            if verticalOrHorizontalMove == 0:
+                if self.player.x > self.enemy.x:
+                    move = Direction.RIGHT
+                else:
+                    move = Direction.LEFT
+            else:
+                if self.player.y > self.enemy.y:
+                    move = Direction.DOWN
+                else:
+                    move = Direction.UP
+        else:
+            move = random.choice(list(Direction))
 
         if self.checkCollision(self.enemy, "enemy", EnemyDirection=move):
             self.enemy.moveEnemy(move)
-
-        # for i in range(self.nOfAllWalls):
 
     def drawWalls(self):
         for i in range(self.nOfHardWalls):
