@@ -80,6 +80,7 @@ class App:
         self.nOfSideWalls = 0
         self.nOfEnemies = 4
         self.parity = 1
+        self.endGame = False
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
@@ -94,19 +95,22 @@ class App:
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_R):
+            self.nOfEnemies = 4
             self.initializeObjects()
+            self.endGame = False
+
 
         self.movePlayer()
-
+        self.executeEnemies()
         timeThisFrame = time.time()
         self.dt = timeThisFrame - self.timeLastFrame
         self.timeLastFrame = timeThisFrame
         self.timeSinceLastMove += self.dt
 
-        if self.timeSinceLastMove >= 0.1:  # speed
+        if self.timeSinceLastMove >= 0.5:  # speed
 
             for i in range(self.nOfEnemies):
-                if self.parity == 3:   # every third move make "intelligent" move
+                if self.parity == 3:  # every third move make "intelligent" move
                     self.moveEnemy(i, moveTowardsPlayer=True)
                     self.parity = 1
                 else:
@@ -115,12 +119,18 @@ class App:
 
                 self.timeSinceLastMove = 0
 
+
     def draw(self):
-        pyxel.cls(0)
-        self.drawWalls()
-        self.player.draw()
-        for i in range(self.nOfEnemies):
-            self.enemy[i].draw()
+        if self.endGame:
+            pyxel.cls(0)
+            self.GameOver()
+        else:
+            pyxel.cls(0)
+            self.drawWalls()
+            self.player.draw()
+            for i in range(self.nOfEnemies):
+                self.enemy[i].draw()
+
 
     def movePlayer(self):
         if not self.checkCollision(self.player):
@@ -176,10 +186,16 @@ class App:
         self.player = Player(self.playerInitPos, self.playerInitPos)
 
         self.enemy = []
-        for i in range(self.nOfEnemies):
+
+        while len(self.enemy) < self.nOfEnemies:
             Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = 8 * int(random.randrange(1, (self.gameSizeY / 8) - 1))
+
             self.enemy.append(Enemy(Xrand, Yrand))
+            for j in range(self.nOfAllWalls):
+                if (self.walls[j].x == Xrand and self.walls[j].y == Yrand) or (
+                        Xrand == playerPos and Yrand == playerPos):
+                    self.enemy.pop(len(self.enemy) - 1)
 
     def moveEnemy(self, whichEnemy, moveTowardsPlayer=False):
         if moveTowardsPlayer:
@@ -200,6 +216,11 @@ class App:
         if self.checkCollision(self.enemy[whichEnemy], "enemy", EnemyDirection=move):
             self.enemy[whichEnemy].moveEnemy(move)
 
+        # check for losing the game
+        for i in range(self.nOfEnemies):
+            if self.player.x == self.enemy[i].x and self.player.y == self.enemy[i].y:
+                self.endGame = True
+
     def drawWalls(self):
         for i in range(self.nOfHardWalls):
             self.walls[i].draw(ifHard=True)
@@ -210,7 +231,7 @@ class App:
     def checkCollision(self, obj, whatObj="notEnemy", EnemyDirection=-1):
         x = obj.x
         y = obj.y
-        print(x, " ", y)
+
         if pyxel.btnp(pyxel.KEY_DOWN) or EnemyDirection == Direction.DOWN:
             y += obj.h
             direction = Direction.DOWN
@@ -228,8 +249,6 @@ class App:
             direction = Direction.RIGHT
 
         if whatObj == "enemy":
-            print(x, " ", y)
-            print(EnemyDirection)
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
                     return False
@@ -247,5 +266,19 @@ class App:
 
         return False
 
+    def executeEnemies(self):
+        continueLoops = True
+        for i in range(self.nOfEnemies):
+            if continueLoops:
+                for j in range(self.nOfAllWalls):
+                    if continueLoops:
+                        if self.walls[j].x == self.enemy[i].x and self.walls[j].y == self.enemy[i].y:
+                            self.enemy.pop(i)
+                            self.nOfEnemies -= 1
+                            continueLoops = False
+                            break
+
+    def GameOver(self):
+        pyxel.blt(90, 50, 0, 0, 8, 72, 16)
 
 App()
