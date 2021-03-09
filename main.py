@@ -74,16 +74,17 @@ class App:
         self.playerInitPos = 32
         self.gameSizeX = 256
         self.gameSizeY = 120
-        self.nOfWalls = 80
+        self.nOfWalls = 60
         self.nOfHardWalls = 9
         self.nOfAllWalls = 0
         self.nOfSideWalls = 0
+        self.nOfEnemies = 4
         self.parity = 1
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="NIBBLES", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
 
-        self.initializeWalls()
+        self.initializeObjects()
 
         self.timeLastFrame = time.time()
         self.dt = 0
@@ -93,7 +94,7 @@ class App:
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_R):
-            self.initializeWalls()
+            self.initializeObjects()
 
         self.movePlayer()
 
@@ -103,20 +104,23 @@ class App:
         self.timeSinceLastMove += self.dt
 
         if self.timeSinceLastMove >= 0.1:  # speed
-            if self.parity == 1:   # every second move make "intelligent" move
-                self.moveEnemy()
-                self.parity = 0
-            else:
-                self.moveEnemy(moveTowardsPlayer=True)
-                self.parity = 1
 
-            self.timeSinceLastMove = 0
+            for i in range(self.nOfEnemies):
+                if self.parity == 3:   # every third move make "intelligent" move
+                    self.moveEnemy(i, moveTowardsPlayer=True)
+                    self.parity = 1
+                else:
+                    self.moveEnemy(i)
+                    self.parity += 1
+
+                self.timeSinceLastMove = 0
 
     def draw(self):
         pyxel.cls(0)
         self.drawWalls()
         self.player.draw()
-        self.enemy.draw()
+        for i in range(self.nOfEnemies):
+            self.enemy[i].draw()
 
     def movePlayer(self):
         if not self.checkCollision(self.player):
@@ -131,7 +135,7 @@ class App:
         if pyxel.btnp(pyxel.KEY_SPACE):
             print("x")
 
-    def initializeWalls(self):
+    def initializeObjects(self):  # walls, enemies and player
         self.walls = []
 
         wallsToDelete = 0
@@ -170,26 +174,31 @@ class App:
         self.nOfSideWalls = self.nOfAllWalls - self.nOfWalls
 
         self.player = Player(self.playerInitPos, self.playerInitPos)
-        self.enemy = Enemy(48, 48)
 
-    def moveEnemy(self, moveTowardsPlayer=False):
+        self.enemy = []
+        for i in range(self.nOfEnemies):
+            Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
+            Yrand = 8 * int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            self.enemy.append(Enemy(Xrand, Yrand))
+
+    def moveEnemy(self, whichEnemy, moveTowardsPlayer=False):
         if moveTowardsPlayer:
             verticalOrHorizontalMove = random.randint(0, 1)
             if verticalOrHorizontalMove == 0:
-                if self.player.x > self.enemy.x:
+                if self.player.x > self.enemy[whichEnemy].x:
                     move = Direction.RIGHT
                 else:
                     move = Direction.LEFT
             else:
-                if self.player.y > self.enemy.y:
+                if self.player.y > self.enemy[whichEnemy].y:
                     move = Direction.DOWN
                 else:
                     move = Direction.UP
         else:
             move = random.choice(list(Direction))
 
-        if self.checkCollision(self.enemy, "enemy", EnemyDirection=move):
-            self.enemy.moveEnemy(move)
+        if self.checkCollision(self.enemy[whichEnemy], "enemy", EnemyDirection=move):
+            self.enemy[whichEnemy].moveEnemy(move)
 
     def drawWalls(self):
         for i in range(self.nOfHardWalls):
