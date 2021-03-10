@@ -9,6 +9,7 @@ import random
 # TODO
 # trapped enemy causes error
 # level name on screen
+# walls are multipled generated on one place
 
 class Direction(enum.Enum):
     RIGHT = 0
@@ -59,8 +60,11 @@ class Enemy:
         self.w = 8
         self.h = 8
 
-    def draw(self):
-        pyxel.blt(self.x, self.y, 0, 8, 0, self.w, self.h)
+    def draw(self, ifBeast=False):
+        if ifBeast:
+            pyxel.blt(self.x, self.y, 0, 32, 0, self.w, self.h)
+        else:
+            pyxel.blt(self.x, self.y, 0, 8, 0, self.w, self.h)
 
     def moveEnemy(self, direction):
         if direction == Direction.LEFT:
@@ -82,8 +86,8 @@ class App:
         self.nOfHardWalls = 9
         self.nOfSideWalls = 0
         self.nOfAllWalls = 0
-        self.nOfEnemiesBuff = 2
-        self.maxNumOfEnemies = 5
+        self.nOfEnemiesBuff = 1
+        self.maxNumOfEnemies = 2
         self.nOfEnemies = self.nOfEnemiesBuff
         self.parity = 1
         self.endGame = False
@@ -129,24 +133,35 @@ class App:
     def draw(self):
         if self.endGame:
             pyxel.cls(0)
-            self.GameOver()
+            self.DrawGameOver()
         else:
             pyxel.cls(0)
             self.drawWalls()
             self.player.draw()
             for i in range(self.nOfEnemies):
-                self.enemy[i].draw()
+                if self.level >= self.hardModeLevel:
+                    self.enemy[i].draw(ifBeast=True)
+                else:
+                    self.enemy[i].draw()
+
+
+    def DrawGameOver(self):
+        pyxel.blt(90, 50, 0, 0, 8, 72, 16)
 
     def movePlayer(self):
         if not self.checkCollision(self.player, whatObj="player"):
             if pyxel.btnp(pyxel.KEY_DOWN):
                 self.player.y += self.player.h
+                print(self.player.x, ",", self.player.y)
             elif pyxel.btnp(pyxel.KEY_UP):
                 self.player.y -= self.player.h
+                print(self.player.x, ",", self.player.y)
             elif pyxel.btnp(pyxel.KEY_LEFT):
                 self.player.x -= self.player.w
+                print(self.player.x, ",", self.player.y)
             elif pyxel.btnp(pyxel.KEY_RIGHT):
                 self.player.x += self.player.w
+                print(self.player.x, ",", self.player.y)
 
             for i in range(self.nOfEnemies):
                 if self.player.x == self.enemy[i].x and self.player.y == self.enemy[i].y:
@@ -161,27 +176,28 @@ class App:
 
         wallsToDelete = 0
         playerPos = int(self.playerInitPos / 8)
-        for i in range(self.nOfHardWalls):
+        for i in range(self.nOfHardWalls):  # hard walls
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
 
             if Xrand == playerPos and Yrand == playerPos:
                 wallsToDelete += 1
+                self.nOfHardWalls += 1
             else:
                 self.walls.append(Wall(Xrand * 8, Yrand * 8))
         self.nOfHardWalls -= wallsToDelete
         wallsToDelete = 0
 
         self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8) + self.nOfHardWalls
-        for i in range(int(self.gameSizeX / 8)):
+        for i in range(int(self.gameSizeX / 8)):  # vertical walls
             self.walls.append(Wall(i * 8, 0))
             self.walls.append(Wall(i * 8, self.gameSizeY - 8))
 
-        for i in range(int(self.gameSizeY / 8)):
+        for i in range(int(self.gameSizeY / 8)):  # horizontal walls
             self.walls.append(Wall(0, i * 8))
             self.walls.append(Wall(self.gameSizeX - 8, i * 8))
 
-        for i in range(self.nOfWalls):
+        for i in range(self.nOfWalls):  # normal walls
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
 
@@ -198,6 +214,13 @@ class App:
 
         self.nOfEnemies = self.nOfEnemiesBuff
         self.enemy = []
+
+        for i in range(self.nOfAllWalls):  # check for repeated walls
+            for j in range(self.nOfAllWalls):
+                if i != j:
+                    if self.walls[i].x == self.walls[j].x and self.walls[i].y == self.walls[j].y:
+                        print("i: ", i, " , j ", j)
+                        print("X: ", self.walls[i].x, ", y: ", self.walls[i].y)
 
         while len(self.enemy) < self.nOfEnemies:
             Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
@@ -269,11 +292,13 @@ class App:
         else:
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
-                    if self.level > self.hardModeLevel and whatObj == "player":  #game over when stepped on yellow wall after certain level
-                        if i < self.nOfHardWalls:
-                            self.endGame = True
-                            self.GameOver()
-                            return False
+                    if self.level >= self.hardModeLevel and whatObj == "player":  # game over when stepped on yellow
+                        if i < self.nOfHardWalls:                                 # wall after certain level
+                            #self.endGame = True
+                            #self.DrawGameOver()
+                            #return False
+                            print("block number: ", i)  # check for invisible walls
+                            print("hardWalls: ", self.nOfHardWalls)
                     if i < self.nOfSideWalls:
                         return True
                     else:
@@ -297,9 +322,6 @@ class App:
         if self.nOfEnemies == 0:
             self.NextLevel()
 
-    def GameOver(self):
-        pyxel.blt(90, 50, 0, 0, 8, 72, 16)
-
     def NextLevel(self):
 
         if self.nOfEnemiesBuff < self.maxNumOfEnemies:
@@ -308,9 +330,8 @@ class App:
         self.endGame = False
         self.speed *= 0.85
         self.level += 1
-        print(self.level)
-        if self.level == 5:
-            print(self.nOfHardWalls)
+        print("level: ", self.level)
+
 
 
 
