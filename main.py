@@ -8,6 +8,7 @@ import random
 # pyxeleditor resources.pyres.pyxres
 # TODO
 # trapped enemy causes error
+# Best perks
 
 class Direction(enum.Enum):
     RIGHT = 0
@@ -77,6 +78,8 @@ class Enemy:
 
 class App:
     def __init__(self):
+        self.enemy = []
+        self.walls = []
         self.playerInitPos = 32
         self.gameSizeX = 256
         self.gameSizeY = 120
@@ -84,14 +87,16 @@ class App:
         self.nOfHardWalls = 9
         self.nOfSideWalls = 0
         self.nOfAllWalls = 0
-        self.nOfEnemiesBuff = 1
-        self.maxNumOfEnemies = 2
-        self.nOfEnemies = self.nOfEnemiesBuff
+        self.nOfEnemies = 2
+        self.maxNumOfEnemies = 5
+        self.nOfEnemiesBuff = self.nOfEnemies
         self.parity = 1
         self.endGame = False
+        self.Menu = False
         self.speed = 1
         self.level = 1
-        self.hardModeLevel = 2
+        self.hardModeLevel = 5
+        self.level_text = ""
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="BEAST", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
@@ -141,7 +146,8 @@ class App:
                     self.enemy[i].draw(ifBeast=True)
                 else:
                     self.enemy[i].draw()
-
+            self.DrawLevel(self.level)
+            self.DrawBeasts(self.nOfEnemies)
 
     def DrawGameOver(self):
         pyxel.blt(90, 50, 0, 0, 8, 72, 16)
@@ -170,23 +176,25 @@ class App:
             self.nOfEnemies -= 1
 
     def initializeObjects(self):  # walls, enemies and player
-        self.walls = []
 
-        wallsToDelete = 0
         playerPos = int(self.playerInitPos / 8)
-        for i in range(self.nOfHardWalls):  # hard walls
+
+        while len(self.walls) < self.nOfHardWalls:  # hard walls
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
-
-            if Xrand == playerPos and Yrand == playerPos:
-                wallsToDelete += 1
-                self.nOfHardWalls += 1
-            else:
-                self.walls.append(Wall(Xrand * 8, Yrand * 8))
-        self.nOfHardWalls -= wallsToDelete
-        wallsToDelete = 0
+            add = True
+            if not (Xrand == playerPos and Yrand == playerPos):
+                if len(self.walls) >= 1:
+                    for i in range(len(self.walls)):
+                        if self.walls[i].x == Xrand * 8 and self.walls[i].y == Yrand * 8:
+                            add = False
+                    if add:
+                        self.walls.append(Wall(Xrand * 8, Yrand * 8))
+                else:
+                    self.walls.append(Wall(Xrand * 8, Yrand * 8))
 
         self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8) + self.nOfHardWalls
+
         for i in range(int(self.gameSizeX / 8)):  # vertical walls
             self.walls.append(Wall(i * 8, 0))
             self.walls.append(Wall(i * 8, self.gameSizeY - 8))
@@ -195,30 +203,22 @@ class App:
             self.walls.append(Wall(0, i * 8))
             self.walls.append(Wall(self.gameSizeX - 8, i * 8))
 
-        for i in range(self.nOfWalls):  # normal walls
+        while len(self.walls) < self.nOfAllWalls:  # hard walls
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            add = True
+            if not (Xrand == playerPos and Yrand == playerPos):
+                for i in range(len(self.walls)):
+                    if self.walls[i].x == Xrand * 8 and self.walls[i].y == Yrand * 8:
+                        add = False
+                if add:
+                    self.walls.append(Wall(Xrand * 8, Yrand * 8))
 
-            if Xrand == playerPos and Yrand == playerPos:
-                wallsToDelete += 1
-            else:
-                self.walls.append(Wall(Xrand * 8, Yrand * 8))
-
-        self.nOfAllWalls -= wallsToDelete
-        self.nOfWalls -= wallsToDelete
         self.nOfSideWalls = self.nOfAllWalls - self.nOfWalls
 
         self.player = Player(self.playerInitPos, self.playerInitPos)
 
         self.nOfEnemies = self.nOfEnemiesBuff
-        self.enemy = []
-
-        for i in range(self.nOfAllWalls):  # check for repeated walls
-            for j in range(self.nOfAllWalls):
-                if i != j:
-                    if self.walls[i].x == self.walls[j].x and self.walls[i].y == self.walls[j].y:
-                        print("i: ", i, " , j ", j)
-                        print("X: ", self.walls[i].x, ", y: ", self.walls[i].y)
 
         while len(self.enemy) < self.nOfEnemies:
             Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
@@ -291,12 +291,10 @@ class App:
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
                     if self.level >= self.hardModeLevel and whatObj == "player":  # game over when stepped on yellow
-                        if i < self.nOfHardWalls:                                 # wall after certain level
-                            #self.endGame = True
-                            #self.DrawGameOver()
-                            #return False
-                            print("block number: ", i)  # check for invisible walls
-                            print("hardWalls: ", self.nOfHardWalls)
+                        if i < self.nOfHardWalls:  # wall after certain level
+                            self.endGame = True
+                            self.DrawGameOver()
+                            return False
                     if i < self.nOfSideWalls:
                         return True
                     else:
@@ -330,7 +328,15 @@ class App:
         self.level += 1
         print("level: ", self.level)
 
+    def DrawLevel(self, level):
+        self.level_text = "Level " + str(level)
+        pyxel.rect(8, 0, len(self.level_text) * pyxel.FONT_WIDTH + 1, 8, 5)
+        pyxel.text(9, 1, self.level_text, 7)
 
+    def DrawBeasts(self, number):
+        self.level_text = "Beasts " + str(number)
+        pyxel.rect(48, 0, len(self.level_text) * pyxel.FONT_WIDTH + 1, 8, 5)
+        pyxel.text(49, 1, self.level_text, 7)
 
 
 App()
