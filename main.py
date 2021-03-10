@@ -9,7 +9,7 @@ import random
 # TODO
 # trapped enemy causes error
 # level name on screen
-# walls are multipled generated on one place
+# Best perks
 
 class Direction(enum.Enum):
     RIGHT = 0
@@ -174,21 +174,24 @@ class App:
     def initializeObjects(self):  # walls, enemies and player
         self.walls = []
 
-        wallsToDelete = 0
         playerPos = int(self.playerInitPos / 8)
-        for i in range(self.nOfHardWalls):  # hard walls
+
+        while len(self.walls) < self.nOfHardWalls:# hard walls
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
-
-            if Xrand == playerPos and Yrand == playerPos:
-                wallsToDelete += 1
-                self.nOfHardWalls += 1
-            else:
-                self.walls.append(Wall(Xrand * 8, Yrand * 8))
-        self.nOfHardWalls -= wallsToDelete
-        wallsToDelete = 0
+            add = True
+            if not (Xrand == playerPos and Yrand == playerPos):
+                if len(self.walls) >= 1:
+                    for i in range(len(self.walls)):
+                        if self.walls[i].x == Xrand * 8 and self.walls[i].y == Yrand * 8:
+                            add = False
+                    if add:
+                        self.walls.append(Wall(Xrand * 8, Yrand * 8))
+                else:
+                    self.walls.append(Wall(Xrand * 8, Yrand * 8))
 
         self.nOfAllWalls = self.nOfWalls + 2 * int(self.gameSizeX / 8) + 2 * int(self.gameSizeY / 8) + self.nOfHardWalls
+
         for i in range(int(self.gameSizeX / 8)):  # vertical walls
             self.walls.append(Wall(i * 8, 0))
             self.walls.append(Wall(i * 8, self.gameSizeY - 8))
@@ -197,17 +200,18 @@ class App:
             self.walls.append(Wall(0, i * 8))
             self.walls.append(Wall(self.gameSizeX - 8, i * 8))
 
-        for i in range(self.nOfWalls):  # normal walls
+        while len(self.walls) < self.nOfAllWalls:  # hard walls
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            add = True
+            if not (Xrand == playerPos and Yrand == playerPos):
+                for i in range(len(self.walls)):
+                    if self.walls[i].x == Xrand * 8 and self.walls[i].y == Yrand * 8:
+                        add = False
+                if add:
+                    self.walls.append(Wall(Xrand * 8, Yrand * 8))
 
-            if Xrand == playerPos and Yrand == playerPos:
-                wallsToDelete += 1
-            else:
-                self.walls.append(Wall(Xrand * 8, Yrand * 8))
 
-        self.nOfAllWalls -= wallsToDelete
-        self.nOfWalls -= wallsToDelete
         self.nOfSideWalls = self.nOfAllWalls - self.nOfWalls
 
         self.player = Player(self.playerInitPos, self.playerInitPos)
@@ -219,7 +223,6 @@ class App:
             for j in range(self.nOfAllWalls):
                 if i != j:
                     if self.walls[i].x == self.walls[j].x and self.walls[i].y == self.walls[j].y:
-                        print("i: ", i, " , j ", j)
                         print("X: ", self.walls[i].x, ", y: ", self.walls[i].y)
 
         while len(self.enemy) < self.nOfEnemies:
