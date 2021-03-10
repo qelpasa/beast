@@ -8,7 +8,6 @@ import random
 # pyxeleditor resources.pyres.pyxres
 # TODO
 # trapped enemy causes error
-# level name on screen
 # Best perks
 
 class Direction(enum.Enum):
