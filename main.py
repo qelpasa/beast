@@ -96,7 +96,6 @@ class App:
         self.speed = 1
         self.level = 1
         self.hardModeLevel = 5
-        self.level_text = ""
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="BEAST", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
@@ -329,14 +328,14 @@ class App:
         print("level: ", self.level)
 
     def DrawLevel(self, level):
-        self.level_text = "Level " + str(level)
-        pyxel.rect(8, 0, len(self.level_text) * pyxel.FONT_WIDTH + 1, 8, 5)
-        pyxel.text(9, 1, self.level_text, 7)
+        levelText = "Level " + str(level)
+        pyxel.rect(8, 0, len(levelText) * pyxel.FONT_WIDTH + 1, 8, 5)
+        pyxel.text(9, 1, levelText, 7)
 
     def DrawBeasts(self, number):
-        self.level_text = "Beasts " + str(number)
-        pyxel.rect(48, 0, len(self.level_text) * pyxel.FONT_WIDTH + 1, 8, 5)
-        pyxel.text(49, 1, self.level_text, 7)
+        levelText = "Beasts " + str(number)
+        pyxel.rect(48, 0, len(levelText) * pyxel.FONT_WIDTH + 1, 8, 5)
+        pyxel.text(49, 1, levelText, 7)
 
 
 App()
