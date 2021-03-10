@@ -8,8 +8,6 @@ import random
 # pyxeleditor resources.pyres.pyxres
 # TODO
 # trapped enemy causes error
-# level name on screen
-# walls are multipled generated on one place
 
 class Direction(enum.Enum):
     RIGHT = 0
