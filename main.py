@@ -80,14 +80,16 @@ class App:
         self.gameSizeY = 120
         self.nOfWalls = 60
         self.nOfHardWalls = 9
-        self.nOfAllWalls = 0
         self.nOfSideWalls = 0
+        self.nOfAllWalls = 0
         self.nOfEnemiesBuff = 2
+        self.maxNumOfEnemies = 5
         self.nOfEnemies = self.nOfEnemiesBuff
-        self.maxNumOfEnemies = 7
         self.parity = 1
         self.endGame = False
         self.speed = 1
+        self.level = 1
+        self.hardModeLevel = 2
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="BEAST", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
@@ -136,7 +138,7 @@ class App:
                 self.enemy[i].draw()
 
     def movePlayer(self):
-        if not self.checkCollision(self.player):
+        if not self.checkCollision(self.player, whatObj="player"):
             if pyxel.btnp(pyxel.KEY_DOWN):
                 self.player.y += self.player.h
             elif pyxel.btnp(pyxel.KEY_UP):
@@ -228,8 +230,7 @@ class App:
         else:
             self.moveEnemy(whichEnemy)
 
-        # check for losing the game
-        for i in range(self.nOfEnemies):
+        for i in range(self.nOfEnemies):  # check for losing the game
             if self.player.x == self.enemy[i].x and self.player.y == self.enemy[i].y:
                 self.endGame = True
 
@@ -268,6 +269,11 @@ class App:
         else:
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
+                    if self.level > self.hardModeLevel and whatObj == "player":  #game over when stepped on yellow wall after certain level
+                        if i < self.nOfHardWalls:
+                            self.endGame = True
+                            self.GameOver()
+                            return False
                     if i < self.nOfSideWalls:
                         return True
                     else:
@@ -275,7 +281,6 @@ class App:
                             return True
                         else:
                             self.walls[i].moveWall(direction)
-
         return False
 
     def executeEnemies(self):
@@ -296,11 +301,17 @@ class App:
         pyxel.blt(90, 50, 0, 0, 8, 72, 16)
 
     def NextLevel(self):
+
         if self.nOfEnemiesBuff < self.maxNumOfEnemies:
             self.nOfEnemiesBuff += 1
         self.initializeObjects()
         self.endGame = False
         self.speed *= 0.85
+        self.level += 1
+        print(self.level)
+        if self.level == 5:
+            print(self.nOfHardWalls)
+
 
 
 App()
