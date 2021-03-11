@@ -309,39 +309,39 @@ class App:
         maxSizeY = int(self.gameSizeY / 8) - 1
 
         while len(self.enemy1lvl) < self.nOf1LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, maxSizeX))
-            Yrand = 8 * int(random.randrange(1, maxSizeY))
+            Xrand = int(random.randrange(1, maxSizeX))
+            Yrand = int(random.randrange(1, maxSizeY))
 
-            self.enemy1lvl.append(Enemy(Xrand, Yrand))
+            self.enemy1lvl.append(Enemy(Xrand * 8, Yrand * 8))
             for j in range(self.nOfAllWalls):
-                if self.isPlayerAround(Xrand, Yrand, playerPosX, playerPosY, j):
+                if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy1lvl.pop()
 
         while len(self.enemy2lvl) < self.nOf2LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, maxSizeX))
-            Yrand = 8 * int(random.randrange(1, maxSizeY))
+            Xrand = int(random.randrange(1, maxSizeX))
+            Yrand = int(random.randrange(1, maxSizeY))
 
-            self.enemy2lvl.append(Enemy(Xrand, Yrand))
+            self.enemy2lvl.append(Enemy(Xrand * 8, Yrand * 8))
             for j in range(self.nOfAllWalls):
-                if self.isPlayerAround(Xrand, Yrand, playerPosX, playerPosY, j):
+                if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy2lvl.pop()
 
         while len(self.enemy3lvl) < self.nOf3LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, maxSizeX))
-            Yrand = 8 * int(random.randrange(1, maxSizeY))
+            Xrand = int(random.randrange(1, maxSizeX))
+            Yrand = int(random.randrange(1, maxSizeY))
 
-            self.enemy3lvl.append(Enemy(Xrand, Yrand))
+            self.enemy3lvl.append(Enemy(Xrand * 8, Yrand * 8))
             for j in range(self.nOfAllWalls):
-                if self.isPlayerAround(Xrand, Yrand, playerPosX, playerPosY, j):
+                if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy3lvl.pop()
 
         while len(self.enemy4lvl) < self.nOf4LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, maxSizeX))
-            Yrand = 8 * int(random.randrange(1, maxSizeY))
+            Xrand = int(random.randrange(1, maxSizeX))
+            Yrand = int(random.randrange(1, maxSizeY))
 
-            self.enemy4lvl.append(Enemy(Xrand, Yrand))
+            self.enemy4lvl.append(Enemy(Xrand * 8, Yrand * 8))
             for j in range(self.nOfAllWalls):
-                if self.isPlayerAround(Xrand, Yrand, playerPosX, playerPosY, j):
+                if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy4lvl.pop()
 
     def moveEnemy(self, whichEnemy, lvl, moveTowardsPlayer=False):
@@ -497,17 +497,9 @@ class App:
                             self.walls[i].moveWall(direction)
         return False
 
-    def isPlayerAround(self, Xrand, Yrand, playerPosX, playerPosY, j):
-        if ((self.walls[j].x == Xrand and self.walls[j].y == Yrand) or
-                (Xrand == playerPosX + 1 and Yrand == playerPosY) or
-                (Xrand == playerPosX - 1 and Yrand == playerPosY) or
-                (Xrand == playerPosX and Yrand == playerPosY) or
-                (Xrand == playerPosX + 1 and Yrand == playerPosY + 1) or
-                (Xrand == playerPosX - 1 and Yrand == playerPosY + 1) or
-                (Xrand == playerPosX and Yrand == playerPosY + 1) or
-                (Xrand == playerPosX + 1 and Yrand == playerPosY - 1) or
-                (Xrand == playerPosX - 1 and Yrand == playerPosY - 1) or
-                (Xrand == playerPosX and Yrand == playerPosY - 1)):
+    def isPlayerAround(self, Xrand, Yrand, j):
+
+        if int(self.walls[j].x / 8) == Xrand and int(self.walls[j].y / 8) == Yrand:
             return True
         else:
             return False
