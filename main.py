@@ -175,14 +175,21 @@ class App:
             self.nOfEnemies -= 1
 
     def initializeObjects(self):  # walls, enemies and player
+        self.walls = []
+        self.enemy = []
 
-        playerPos = int(self.playerInitPos / 8)
+        if self.level >= 2:
+            playerPosX = self.player.x / 8
+            playerPosY = self.player.y / 8
+        else:
+            playerPosX = int(self.playerInitPos / 8)
+            playerPosY = playerPosX
 
         while len(self.walls) < self.nOfHardWalls:  # hard walls
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
             add = True
-            if not (Xrand == playerPos and Yrand == playerPos):
+            if not (Xrand == playerPosX and Yrand == playerPosY):
                 if len(self.walls) >= 1:
                     for i in range(len(self.walls)):
                         if self.walls[i].x == Xrand * 8 and self.walls[i].y == Yrand * 8:
@@ -206,7 +213,7 @@ class App:
             Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
             Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
             add = True
-            if not (Xrand == playerPos and Yrand == playerPos):
+            if not (Xrand == playerPosX and Yrand == playerPosY):
                 for i in range(len(self.walls)):
                     if self.walls[i].x == Xrand * 8 and self.walls[i].y == Yrand * 8:
                         add = False
@@ -215,7 +222,7 @@ class App:
 
         self.nOfSideWalls = self.nOfAllWalls - self.nOfWalls
 
-        self.player = Player(self.playerInitPos, self.playerInitPos)
+        self.player = Player(playerPosX * 8, playerPosY * 8)
 
         self.nOfEnemies = self.nOfEnemiesBuff
 
@@ -225,8 +232,7 @@ class App:
 
             self.enemy.append(Enemy(Xrand, Yrand))
             for j in range(self.nOfAllWalls):
-                if (self.walls[j].x == Xrand and self.walls[j].y == Yrand) or (
-                        Xrand == playerPos and Yrand == playerPos):
+                if self.isPlayerAround(Xrand, Yrand, playerPosX, playerPosY, j):
                     self.enemy.pop(len(self.enemy) - 1)
 
     def moveEnemy(self, whichEnemy, moveTowardsPlayer=False):
@@ -303,6 +309,24 @@ class App:
                             self.walls[i].moveWall(direction)
         return False
 
+    def isPlayerAround(self,Xrand, Yrand, playerPosX, playerPosY, j):
+        if ((self.walls[j].x == Xrand and self.walls[j].y == Yrand) or
+                (Xrand == playerPosX + 1 and Yrand == playerPosY) or
+                (Xrand == playerPosX - 1 and Yrand == playerPosY) or
+                (Xrand == playerPosX and Yrand == playerPosY) or
+                (Xrand == playerPosX + 1 and Yrand == playerPosY + 1) or
+                (Xrand == playerPosX - 1 and Yrand == playerPosY + 1) or
+                (Xrand == playerPosX and Yrand == playerPosY + 1) or
+                (Xrand == playerPosX + 1 and Yrand == playerPosY - 1) or
+                (Xrand == playerPosX - 1 and Yrand == playerPosY - 1) or
+                (Xrand == playerPosX and Yrand == playerPosY - 1)):
+            return True
+        else:
+            return False
+
+
+
+
     def executeEnemies(self):
         continueLoops = True
         for i in range(self.nOfEnemies):
@@ -319,12 +343,12 @@ class App:
 
     def NextLevel(self):
 
+        self.level += 1
         if self.nOfEnemiesBuff < self.maxNumOfEnemies:
             self.nOfEnemiesBuff += 1
         self.initializeObjects()
         self.endGame = False
         self.speed *= 0.85
-        self.level += 1
         print("level: ", self.level)
 
     def DrawLevel(self, level):
