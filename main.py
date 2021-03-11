@@ -118,7 +118,7 @@ class App:
 
         self.parity = 1
         self.endGame = False
-        self.Menu = False
+        self.Menu = False  # make menu TODO
         self.speed = 1
         self.level = 1
         self.hardModeLevel = 5
@@ -156,7 +156,7 @@ class App:
                 self.timeSinceLastMove = 0
 
             for i in range(self.nOf2LvlEnemies):
-                if self.parity == 3:  # every third move make non "intelligent" move
+                if self.parity == 2:  # every second move make non "intelligent" move
                     self.moveEnemy(i, lvl=2)
                     self.parity = 1
                 else:
@@ -168,6 +168,20 @@ class App:
         if pyxel.btnp(pyxel.KEY_R):
             self.initializeObjects()
             self.endGame = False
+
+        elif pyxel.btnp(pyxel.KEY_1):
+            self.enemy1lvl.pop(0)
+            self.nOf1LvlEnemies -= 1
+            self.nOfEnemies -= 1
+            if self.nOfEnemies == 0:
+                self.NextLevel()
+
+        elif pyxel.btnp(pyxel.KEY_2):
+            self.enemy2lvl.pop(0)
+            self.nOf2LvlEnemies -= 1
+            self.nOfEnemies -= 1
+            if self.nOfEnemies == 0:
+                self.NextLevel()
 
     def draw(self):
         if self.endGame:
@@ -187,10 +201,16 @@ class App:
 
     def drawEnemies(self):
         for i in range(self.nOf1LvlEnemies):
-            self.enemy1lvl[i].draw(1)
+            self.enemy1lvl[i].draw(BeastLevel=1)
 
         for i in range(self.nOf2LvlEnemies):
-            self.enemy2lvl[i].draw(2)
+            self.enemy2lvl[i].draw(BeastLevel=2)
+
+        for i in range(self.nOf3LvlEnemies):
+            self.enemy3lvl[i].draw(BeastLevel=3)
+
+        for i in range(self.nOf4LvlEnemies):
+            self.enemy4lvl[i].draw(BeastLevel=4)
 
     def movePlayer(self):
         if not self.checkCollision(self.player, whatObj="player"):
@@ -206,32 +226,21 @@ class App:
             for j in range(self.nOf1LvlEnemies):
                 if self.player.x == self.enemy1lvl[j].x and self.player.y == self.enemy1lvl[j].y:
                     self.endGame = True
+
             for j in range(self.nOf2LvlEnemies):
                 if self.player.x == self.enemy2lvl[j].x and self.player.y == self.enemy2lvl[j].y:
                     self.endGame = True
+
             for j in range(self.nOf3LvlEnemies):
                 if self.player.x == self.enemy3lvl[j].x and self.player.y == self.enemy3lvl[j].y:
                     self.endGame = True
+
             for j in range(self.nOf4LvlEnemies):
                 if self.player.x == self.enemy4lvl[j].x and self.player.y == self.enemy4lvl[j].y:
                     self.endGame = True
 
-        if pyxel.btnp(pyxel.KEY_1):
-            self.enemy1lvl.pop(0)
-            self.nOf1LvlEnemies -= 1
-            self.nOfEnemies -= 1
-            if self.nOfEnemies == 0:
-                self.NextLevel()
-
-        if pyxel.btnp(pyxel.KEY_2):
-            self.enemy2lvl.pop(0)
-            self.nOf2LvlEnemies -= 1
-            self.nOfEnemies -= 1
-            if self.nOfEnemies == 0:
-                self.NextLevel()
-
     def initializeObjects(self):  # walls, enemies and player
-        self.timeSinceLastMove = -1
+        self.timeSinceLastMove = -0.5
         self.walls = []
         self.enemy1lvl = []
         self.enemy2lvl = []
