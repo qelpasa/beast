@@ -231,11 +231,14 @@ class App:
                 self.NextLevel()
 
     def initializeObjects(self):  # walls, enemies and player
+        self.timeSinceLastMove = -1
         self.walls = []
         self.enemy1lvl = []
         self.enemy2lvl = []
         self.enemy3lvl = []
         self.enemy4lvl = []
+        maxSizeX = int(self.gameSizeX / 8) - 1
+        maxSizeY = int(self.gameSizeY / 8) - 1
 
         if self.level >= 2:
             playerPosX = self.player.x / 8
@@ -245,8 +248,8 @@ class App:
             playerPosY = playerPosX
 
         while len(self.walls) < self.nOfHardWalls:  # hard walls
-            Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
-            Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            Xrand = int(random.randrange(1, maxSizeX))
+            Yrand = int(random.randrange(1, maxSizeY))
             add = True
             if not (Xrand == playerPosX and Yrand == playerPosY):
                 if len(self.walls) >= 1:
@@ -269,8 +272,8 @@ class App:
             self.walls.append(Wall(self.gameSizeX - 8, i * 8))
 
         while len(self.walls) < self.nOfAllWalls:  # hard walls
-            Xrand = int(random.randrange(1, (self.gameSizeX / 8) - 1))
-            Yrand = int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            Xrand = int(random.randrange(1, maxSizeX))
+            Yrand = int(random.randrange(1, maxSizeY))
             add = True
             if not (Xrand == playerPosX and Yrand == playerPosY):
                 for i in range(len(self.walls)):
@@ -293,9 +296,12 @@ class App:
         self.nOf3LvlEnemies = self.nOf3LvlEnemiesBuff
         self.nOf4LvlEnemies = self.nOf4LvlEnemiesBuff
 
+        maxSizeX = int(self.gameSizeX / 8) - 1
+        maxSizeY = int(self.gameSizeY / 8) - 1
+
         while len(self.enemy1lvl) < self.nOf1LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
-            Yrand = 8 * int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            Xrand = 8 * int(random.randrange(1, maxSizeX))
+            Yrand = 8 * int(random.randrange(1, maxSizeY))
 
             self.enemy1lvl.append(Enemy(Xrand, Yrand))
             for j in range(self.nOfAllWalls):
@@ -303,8 +309,8 @@ class App:
                     self.enemy1lvl.pop(len(self.enemy1lvl) - 1)
 
         while len(self.enemy2lvl) < self.nOf2LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
-            Yrand = 8 * int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            Xrand = 8 * int(random.randrange(1, maxSizeX))
+            Yrand = 8 * int(random.randrange(1, maxSizeY))
 
             self.enemy2lvl.append(Enemy(Xrand, Yrand))
             for j in range(self.nOfAllWalls):
@@ -312,8 +318,8 @@ class App:
                     self.enemy2lvl.pop(len(self.enemy2lvl) - 1)
 
         while len(self.enemy3lvl) < self.nOf3LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
-            Yrand = 8 * int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            Xrand = 8 * int(random.randrange(1, maxSizeX))
+            Yrand = 8 * int(random.randrange(1, maxSizeY))
 
             self.enemy3lvl.append(Enemy(Xrand, Yrand))
             for j in range(self.nOfAllWalls):
@@ -321,8 +327,8 @@ class App:
                     self.enemy3lvl.pop(len(self.enemy3lvl) - 1)
 
         while len(self.enemy4lvl) < self.nOf4LvlEnemies:
-            Xrand = 8 * int(random.randrange(1, (self.gameSizeX / 8) - 1))
-            Yrand = 8 * int(random.randrange(1, (self.gameSizeY / 8) - 1))
+            Xrand = 8 * int(random.randrange(1, maxSizeX))
+            Yrand = 8 * int(random.randrange(1, maxSizeY))
 
             self.enemy4lvl.append(Enemy(Xrand, Yrand))
             for j in range(self.nOfAllWalls):
@@ -401,7 +407,7 @@ class App:
                 print("enemy: ", whichEnemy)
                 self.enemy3lvl[whichEnemy].moveEnemy(move)
             else:
-                self.moveEnemy(whichEnemy, 3)
+                self.moveEnemy(whichEnemy, lvl=3)
 
             for i in range(self.nOf3LvlEnemies):  # check for losing the game
                 if self.player.x == self.enemy3lvl[i].x and self.player.y == self.enemy3lvl[i].y:
@@ -427,7 +433,7 @@ class App:
                 print("enemy: ", whichEnemy)
                 self.enemy4lvl[whichEnemy].moveEnemy(move)
             else:
-                self.moveEnemy(whichEnemy, 3)
+                self.moveEnemy(whichEnemy, lvl=4)
 
             for i in range(self.nOf4LvlEnemies):  # check for losing the game
                 if self.player.x == self.enemy4lvl[i].x and self.player.y == self.enemy4lvl[i].y:
@@ -576,7 +582,7 @@ class App:
 
         self.initializeObjects()
         self.endGame = False
-        self.speed *= 0.85
+        self.speed *= 0.9
         print("level: ", self.level)
 
     def DrawLevel(self, level):
