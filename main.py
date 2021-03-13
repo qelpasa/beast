@@ -71,11 +71,11 @@ class Enemy:
     def moveEnemy(self, direction):
         if direction == Direction.LEFT:
             self.x -= self.w
-        if direction == Direction.RIGHT:
+        elif direction == Direction.RIGHT:
             self.x += self.w
-        if direction == Direction.UP:
+        elif direction == Direction.UP:
             self.y -= self.h
-        if direction == Direction.DOWN:
+        elif direction == Direction.DOWN:
             self.y += self.h
 
 
@@ -121,9 +121,9 @@ class App:
 
         self.speedlvl = []
         self.speedlvl.append(1)
-        self.speedlvl.append(0.9 * self.speedlvl[0])
-        self.speedlvl.append(0.9 * self.speedlvl[1])
-        self.speedlvl.append(0.9 * self.speedlvl[2])
+        self.speedlvl.append(1.1 * self.speedlvl[0])
+        self.speedlvl.append(1.1 * self.speedlvl[1])
+        self.speedlvl.append(1.1 * self.speedlvl[2])
 
         self.level = 1
         self.hardModeLevel = 5
@@ -156,7 +156,6 @@ class App:
             self.timeSinceLastMove[i] += self.dt[i]
 
         if self.timeSinceLastMove[0] >= self.speedlvl[0]:
-
             for i in range(self.nOf1LvlEnemies):
                 if self.parity == 3:  # every third move make move towards player
                     self.moveEnemy(i, lvl=1, moveTowardsPlayer=True)
@@ -178,6 +177,12 @@ class App:
 
             self.timeSinceLastMove[1] = 0
 
+        if self.timeSinceLastMove[2] >= self.speedlvl[2]:
+            for i in range(self.nOf3LvlEnemies):
+                self.moveEnemy(i, lvl=3, moveTowardsPlayer=True)
+
+            self.timeSinceLastMove[2] = 0
+
         if pyxel.btnp(pyxel.KEY_R):
             self.initializeObjects()
             self.endGame = False
@@ -192,6 +197,20 @@ class App:
         elif pyxel.btnp(pyxel.KEY_2):
             self.enemy2lvl.pop(0)
             self.nOf2LvlEnemies -= 1
+            self.nOfEnemies -= 1
+            if self.nOfEnemies == 0:
+                self.NextLevel()
+
+        elif pyxel.btnp(pyxel.KEY_3):
+            self.enemy3lvl.pop(0)
+            self.nOf3LvlEnemies -= 1
+            self.nOfEnemies -= 1
+            if self.nOfEnemies == 0:
+                self.NextLevel()
+
+        elif pyxel.btnp(pyxel.KEY_4):
+            self.enemy4lvl.pop(0)
+            self.nOf4LvlEnemies -= 1
             self.nOfEnemies -= 1
             if self.nOfEnemies == 0:
                 self.NextLevel()
@@ -258,7 +277,6 @@ class App:
 
         self.speedlvl[1] = 0.9 * self.speedlvl[0]
         self.speedlvl[2] = 0.9 * self.speedlvl[1]
-        self.speedlvl[3] = 0.9 * self.speedlvl[2]
 
         self.walls = []
         self.enemy1lvl = []
@@ -386,9 +404,6 @@ class App:
 
         if lvl == 3:
             self.moveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy3lvl, self.nOf3LvlEnemies)
-
-        if lvl == 4:
-            self.moveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy4lvl, self.nOf4LvlEnemies)
 
     def moveEnemyLevel(self, whichEnemy, lvl, moveTowardsPlayer, obj, nOfEnemies):
         if moveTowardsPlayer:
@@ -543,6 +558,14 @@ class App:
         if self.level >= self.hardModeLevel:
             if self.nOf2LvlEnemiesBuff < self.max2lvlEnemies:
                 self.nOf2LvlEnemiesBuff += 1
+
+        if self.level >= self.hardModeLevel + self.max2lvlEnemies:
+            if self.nOf3LvlEnemiesBuff < self.max3lvlEnemies:
+                self.nOf3LvlEnemiesBuff += 1
+
+        if self.level >= self.hardModeLevel + self.max2lvlEnemies + self.max3lvlEnemies:
+            if self.nOf4LvlEnemiesBuff < self.max4lvlEnemies:
+                self.nOf4LvlEnemiesBuff += 1
 
         self.speedlvl[0] *= 0.9
         self.initializeObjects()
