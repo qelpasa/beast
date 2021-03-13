@@ -97,7 +97,7 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.nOf1LvlEnemies = 30
+        self.nOf1LvlEnemies = 0
         self.nOf2LvlEnemies = 15
         self.nOf3LvlEnemies = 0
         self.nOf4LvlEnemies = 0  # mines
@@ -107,7 +107,7 @@ class App:
         self.nOf3LvlEnemiesBuff = self.nOf3LvlEnemies
         self.nOf4LvlEnemiesBuff = self.nOf4LvlEnemies
 
-        self.max1lvlEnemies = 30
+        self.max1lvlEnemies = 0
         self.max2lvlEnemies = 15
         self.max3lvlEnemies = 1
         self.max4lvlEnemies = 5  # mines
@@ -146,24 +146,22 @@ class App:
         if self.timeSinceLastMove >= self.speed:
 
             for i in range(self.nOf1LvlEnemies):
-                if self.parity == 3:  # every third move make "intelligent" move
+                if self.parity == 3:  # every third move make move towards player
                     self.moveEnemy(i, lvl=1, moveTowardsPlayer=True)
                     self.parity = 1
                 else:
                     self.moveEnemy(i, lvl=1)
                     self.parity += 1
 
-                self.timeSinceLastMove = 0
-
             for i in range(self.nOf2LvlEnemies):
-                if self.parity == 2:  # every second move make non "intelligent" move
+                if self.parity == 2:  # every second move make move towards player
                     self.moveEnemy(i, lvl=2)
                     self.parity = 1
                 else:
                     self.moveEnemy(i, lvl=2, moveTowardsPlayer=True)
                     self.parity += 1
 
-                self.timeSinceLastMove = 0
+            self.timeSinceLastMove = 0
 
         if pyxel.btnp(pyxel.KEY_R):
             self.initializeObjects()
@@ -399,7 +397,6 @@ class App:
         for i in range(nOfEnemies):  # check for losing the game
             if self.player.x == obj[i].x and self.player.y == obj[i].y:
                 self.endGame = True
-
 
     def drawWalls(self):
         for i in range(self.nOfHardWalls):
