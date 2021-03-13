@@ -97,8 +97,8 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.nOf1LvlEnemies = 2
-        self.nOf2LvlEnemies = 0
+        self.nOf1LvlEnemies = 30
+        self.nOf2LvlEnemies = 15
         self.nOf3LvlEnemies = 0
         self.nOf4LvlEnemies = 0  # mines
 
@@ -107,8 +107,8 @@ class App:
         self.nOf3LvlEnemiesBuff = self.nOf3LvlEnemies
         self.nOf4LvlEnemiesBuff = self.nOf4LvlEnemies
 
-        self.max1lvlEnemies = 5
-        self.max2lvlEnemies = 3
+        self.max1lvlEnemies = 30
+        self.max2lvlEnemies = 15
         self.max3lvlEnemies = 1
         self.max4lvlEnemies = 5  # mines
 
@@ -249,14 +249,14 @@ class App:
         maxSizeX = int(self.gameSizeX / 8) - 1
         maxSizeY = int(self.gameSizeY / 8) - 1
 
-        if self.level >= 2:
+        if self.level >= 2:  # gets players last position
             playerPosX = self.player.x / 8
             playerPosY = self.player.y / 8
         else:
             playerPosX = int(self.playerInitPos / 8)
             playerPosY = playerPosX
 
-        while len(self.walls) < self.nOfHardWalls:  # hard walls
+        while len(self.walls) < self.nOfHardWalls:  # hard walls (yellow)
             Xrand = int(random.randrange(1, maxSizeX))
             Yrand = int(random.randrange(1, maxSizeY))
             add = True
@@ -295,11 +295,11 @@ class App:
 
         self.player = Player(playerPosX * 8, playerPosY * 8)
 
-        self.initializeEnemies(playerPosX, playerPosY)
+        self.initializeEnemies()
 
         self.nOfEnemies = self.nOf1LvlEnemiesBuff + self.nOf2LvlEnemiesBuff + self.nOf3LvlEnemiesBuff + self.nOf4LvlEnemiesBuff
 
-    def initializeEnemies(self, playerPosX, playerPosY):
+    def initializeEnemies(self):
         self.nOf1LvlEnemies = self.nOf1LvlEnemiesBuff
         self.nOf2LvlEnemies = self.nOf2LvlEnemiesBuff
         self.nOf3LvlEnemies = self.nOf3LvlEnemiesBuff
@@ -316,6 +316,7 @@ class App:
             for j in range(self.nOfAllWalls):
                 if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy1lvl.pop()
+                    break
 
         while len(self.enemy2lvl) < self.nOf2LvlEnemies:
             Xrand = int(random.randrange(1, maxSizeX))
@@ -325,6 +326,7 @@ class App:
             for j in range(self.nOfAllWalls):
                 if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy2lvl.pop()
+                    break
 
         while len(self.enemy3lvl) < self.nOf3LvlEnemies:
             Xrand = int(random.randrange(1, maxSizeX))
@@ -334,6 +336,7 @@ class App:
             for j in range(self.nOfAllWalls):
                 if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy3lvl.pop()
+                    break
 
         while len(self.enemy4lvl) < self.nOf4LvlEnemies:
             Xrand = int(random.randrange(1, maxSizeX))
@@ -343,110 +346,60 @@ class App:
             for j in range(self.nOfAllWalls):
                 if self.isPlayerAround(Xrand, Yrand, j):
                     self.enemy4lvl.pop()
+                    break
+
+    def isPlayerAround(self, Xrand, Yrand, j):
+        PlayerPosX = int(self.player.x / 8)
+        PlayerPosY = int(self.player.y / 8)
+        if int(self.walls[j].x / 8) == Xrand and int(self.walls[j].y / 8) == Yrand:  # if enemy spawns on walls
+            return True
+        elif PlayerPosX == Xrand and PlayerPosY == Yrand:
+            return True
+        else:
+            return False
 
     def moveEnemy(self, whichEnemy, lvl, moveTowardsPlayer=False):
         if lvl == 1:
-            if moveTowardsPlayer:
-                verticalOrHorizontalMove = random.randint(0, 1)
-                if verticalOrHorizontalMove == 0:
-                    if self.player.x > self.enemy1lvl[whichEnemy].x:
-                        move = Direction.RIGHT
-                    else:
-                        move = Direction.LEFT
-                else:
-                    if self.player.y > self.enemy1lvl[whichEnemy].y:
-                        move = Direction.DOWN
-                    else:
-                        move = Direction.UP
-            else:
-                move = random.choice(list(Direction))
-
-            if self.checkCollision(self.enemy1lvl[whichEnemy], "enemy", EnemyDirection=move):
-                self.enemy1lvl[whichEnemy].moveEnemy(move)
-            else:
-                self.moveEnemy(whichEnemy, 1)
-
-            for i in range(self.nOf1LvlEnemies):  # check for losing the game
-                if self.player.x == self.enemy1lvl[i].x and self.player.y == self.enemy1lvl[i].y:
-                    self.endGame = True
+            self.moveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy1lvl, self.nOf1LvlEnemies)
 
         if lvl == 2:
-            if moveTowardsPlayer:
-                verticalOrHorizontalMove = random.randint(0, 1)
-                if verticalOrHorizontalMove == 0:
-                    if self.player.x > self.enemy2lvl[whichEnemy].x:
-                        move = Direction.RIGHT
-                    else:
-                        move = Direction.LEFT
-                else:
-                    if self.player.y > self.enemy2lvl[whichEnemy].y:
-                        move = Direction.DOWN
-                    else:
-                        move = Direction.UP
-            else:
-                move = random.choice(list(Direction))
-
-            if self.checkCollision(self.enemy2lvl[whichEnemy], "enemy", EnemyDirection=move):
-                print("enemy: ", whichEnemy)
-                self.enemy2lvl[whichEnemy].moveEnemy(move)
-            else:
-                self.moveEnemy(whichEnemy, lvl=2)
-
-            for i in range(self.nOf2LvlEnemies):  # check for losing the game
-                if self.player.x == self.enemy2lvl[i].x and self.player.y == self.enemy2lvl[i].y:
-                    self.endGame = True
+            self.moveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy2lvl, self.nOf2LvlEnemies)
 
         if lvl == 3:
-            if moveTowardsPlayer:
-                verticalOrHorizontalMove = random.randint(0, 1)
-                if verticalOrHorizontalMove == 0:
-                    if self.player.x > self.enemy3lvl[whichEnemy].x:
-                        move = Direction.RIGHT
-                    else:
-                        move = Direction.LEFT
-                else:
-                    if self.player.y > self.enemy3lvl[whichEnemy].y:
-                        move = Direction.DOWN
-                    else:
-                        move = Direction.UP
-            else:
-                move = random.choice(list(Direction))
-
-            if self.checkCollision(self.enemy3lvl[whichEnemy], "enemy", EnemyDirection=move):
-                print("enemy: ", whichEnemy)
-                self.enemy3lvl[whichEnemy].moveEnemy(move)
-            else:
-                self.moveEnemy(whichEnemy, lvl=3)
-
-            for i in range(self.nOf3LvlEnemies):  # check for losing the game
-                if self.player.x == self.enemy3lvl[i].x and self.player.y == self.enemy3lvl[i].y:
-                    self.endGame = True
+            self.moveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy3lvl, self.nOf3LvlEnemies)
 
         if lvl == 4:
-            if moveTowardsPlayer:
-                verticalOrHorizontalMove = random.randint(0, 1)
-                if verticalOrHorizontalMove == 0:
-                    if self.player.x > self.enemy4lvl[whichEnemy].x:
-                        move = Direction.RIGHT
-                    else:
-                        move = Direction.LEFT
+            self.moveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy4lvl, self.nOf4LvlEnemies)
+
+    def moveEnemyLevel(self, whichEnemy, lvl, moveTowardsPlayer, obj, nOfEnemies):
+        if moveTowardsPlayer:
+            verticalOrHorizontalMove = random.randint(0, 1)
+            if verticalOrHorizontalMove == 0:
+                if self.player.x > obj[whichEnemy].x:
+                    move = Direction.RIGHT
                 else:
-                    if self.player.y > self.enemy4lvl[whichEnemy].y:
-                        move = Direction.DOWN
-                    else:
-                        move = Direction.UP
+                    move = Direction.LEFT
             else:
-                move = random.choice(list(Direction))
+                if self.player.y > obj[whichEnemy].y:
+                    move = Direction.DOWN
+                else:
+                    move = Direction.UP
+        else:
+            move = random.choice(list(Direction))
 
-            if self.checkCollision(self.enemy4lvl[whichEnemy], "enemy", EnemyDirection=move):
-                print("enemy: ", whichEnemy)
-                self.enemy4lvl[whichEnemy].moveEnemy(move)
-            else:
-                self.moveEnemy(whichEnemy, lvl=4)
+        if self.checkCollision(obj[whichEnemy], "enemy", EnemyDirection=move):
+            obj[whichEnemy].moveEnemy(move)
+        else:  # when trapped
+            if self.checkCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.LEFT) or \
+                    self.checkCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.RIGHT) or \
+                    self.checkCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.UP) or \
+                    self.checkCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.DOWN):
+                self.moveEnemy(whichEnemy, lvl)
 
-            for i in range(self.nOf4LvlEnemies):  # check for losing the game
-                if self.player.x == self.enemy4lvl[i].x and self.player.y == self.enemy4lvl[i].y:
-                    self.endGame = True
+        for i in range(nOfEnemies):  # check for losing the game
+            if self.player.x == obj[i].x and self.player.y == obj[i].y:
+                self.endGame = True
+
 
     def drawWalls(self):
         for i in range(self.nOfHardWalls):
@@ -496,13 +449,6 @@ class App:
                         else:
                             self.walls[i].moveWall(direction)
         return False
-
-    def isPlayerAround(self, Xrand, Yrand, j):
-
-        if int(self.walls[j].x / 8) == Xrand and int(self.walls[j].y / 8) == Yrand:
-            return True
-        else:
-            return False
 
     def executeEnemies(self):
         self.execute1lvlEnemies()
