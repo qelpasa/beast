@@ -7,7 +7,6 @@ import random
 # paste into terminal to enter pyxel editor
 # pyxeleditor resources.pyres.pyxres
 # TODO
-# trapped enemy causes error
 # Best perks
 
 class Direction(enum.Enum):
@@ -97,8 +96,8 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.nOf1LvlEnemies = 0
-        self.nOf2LvlEnemies = 15
+        self.nOf1LvlEnemies = 5
+        self.nOf2LvlEnemies = 5
         self.nOf3LvlEnemies = 0
         self.nOf4LvlEnemies = 0  # mines
 
@@ -107,8 +106,8 @@ class App:
         self.nOf3LvlEnemiesBuff = self.nOf3LvlEnemies
         self.nOf4LvlEnemiesBuff = self.nOf4LvlEnemies
 
-        self.max1lvlEnemies = 0
-        self.max2lvlEnemies = 15
+        self.max1lvlEnemies = 5
+        self.max2lvlEnemies = 5
         self.max3lvlEnemies = 1
         self.max4lvlEnemies = 5  # mines
 
@@ -118,32 +117,45 @@ class App:
 
         self.parity = 1
         self.endGame = False
-        self.Menu = False  # make menu TODO
-        self.speed = 1
+        self.Menu = False  # TODO make menu
+
+        self.speedlvl = []
+        self.speedlvl.append(1)
+        self.speedlvl.append(0.9 * self.speedlvl[0])
+        self.speedlvl.append(0.9 * self.speedlvl[1])
+        self.speedlvl.append(0.9 * self.speedlvl[2])
+
         self.level = 1
         self.hardModeLevel = 5
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="BEAST", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
 
-        self.initializeObjects()
+        self.timeLastFrame = []
+        self.dt = []
+        self.timeSinceLastMove = []
 
-        self.timeLastFrame = time.time()
-        self.dt = 0
-        self.timeSinceLastMove = 0
+        for i in range(4):
+            self.timeLastFrame.append(time.time())
+            self.dt.append(0)
+            self.timeSinceLastMove.append(0)
+
+        self.initializeObjects()
 
         pyxel.run(self.update, self.draw)
 
     def update(self):
         self.movePlayer()
         self.executeEnemies()
+        timeThisFrame = []
 
-        timeThisFrame = time.time()
-        self.dt = timeThisFrame - self.timeLastFrame
-        self.timeLastFrame = timeThisFrame
-        self.timeSinceLastMove += self.dt
+        for i in range(4):
+            timeThisFrame.append(time.time())
+            self.dt[i] = timeThisFrame[i] - self.timeLastFrame[i]
+            self.timeLastFrame[i] = timeThisFrame[i]
+            self.timeSinceLastMove[i] += self.dt[i]
 
-        if self.timeSinceLastMove >= self.speed:
+        if self.timeSinceLastMove[0] >= self.speedlvl[0]:
 
             for i in range(self.nOf1LvlEnemies):
                 if self.parity == 3:  # every third move make move towards player
@@ -153,6 +165,9 @@ class App:
                     self.moveEnemy(i, lvl=1)
                     self.parity += 1
 
+            self.timeSinceLastMove[0] = 0
+
+        if self.timeSinceLastMove[1] >= self.speedlvl[1]:
             for i in range(self.nOf2LvlEnemies):
                 if self.parity == 2:  # every second move make move towards player
                     self.moveEnemy(i, lvl=2)
@@ -161,7 +176,7 @@ class App:
                     self.moveEnemy(i, lvl=2, moveTowardsPlayer=True)
                     self.parity += 1
 
-            self.timeSinceLastMove = 0
+            self.timeSinceLastMove[1] = 0
 
         if pyxel.btnp(pyxel.KEY_R):
             self.initializeObjects()
@@ -238,7 +253,13 @@ class App:
                     self.endGame = True
 
     def initializeObjects(self):  # walls, enemies and player
-        self.timeSinceLastMove = -0.5
+        for i in range(4):
+            self.timeSinceLastMove[i] = -0.5
+
+        self.speedlvl[1] = 0.9 * self.speedlvl[0]
+        self.speedlvl[2] = 0.9 * self.speedlvl[1]
+        self.speedlvl[3] = 0.9 * self.speedlvl[2]
+
         self.walls = []
         self.enemy1lvl = []
         self.enemy2lvl = []
@@ -514,7 +535,6 @@ class App:
             self.NextLevel()
 
     def NextLevel(self):
-
         self.level += 1
 
         if self.nOf1LvlEnemiesBuff < self.max1lvlEnemies:
@@ -524,9 +544,9 @@ class App:
             if self.nOf2LvlEnemiesBuff < self.max2lvlEnemies:
                 self.nOf2LvlEnemiesBuff += 1
 
+        self.speedlvl[0] *= 0.9
         self.initializeObjects()
         self.endGame = False
-        self.speed *= 0.9
         print("level: ", self.level)
 
     def DrawLevel(self, level):
