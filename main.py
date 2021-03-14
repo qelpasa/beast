@@ -401,7 +401,16 @@ class App:
         PlayerPosY = int(self.player.y / 8)
         if int(self.walls[j].x / 8) == Xrand and int(self.walls[j].y / 8) == Yrand:  # if enemy spawns on walls
             return True
-        elif PlayerPosX == Xrand and PlayerPosY == Yrand:  # if enemy spawns on player
+        elif PlayerPosX == Xrand and PlayerPosY == Yrand:  # if enemy spawns on player or around
+            return True
+        elif (PlayerPosX == Xrand + 1 and PlayerPosY == Yrand + 1) or \
+                (PlayerPosX == Xrand + 1 and PlayerPosY == Yrand) or \
+                (PlayerPosX == Xrand + 1 and PlayerPosY == Yrand - 1) or \
+                (PlayerPosX == Xrand and PlayerPosY == Yrand + 1) or \
+                (PlayerPosX == Xrand and PlayerPosY == Yrand - 1) or \
+                (PlayerPosX == Xrand - 1 and PlayerPosY == Yrand + 1) or \
+                (PlayerPosX == Xrand - 1 and PlayerPosY == Yrand) or \
+                (PlayerPosX == Xrand - 1 and PlayerPosY == Yrand - 1):
             return True
         else:
             return False
