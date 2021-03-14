@@ -6,9 +6,12 @@ import random
 
 # paste into terminal to enter pyxel editor
 # pyxeleditor resources.pyres.pyxres
+
 # TODO
 # Best perks
 # cant exit game in main menu
+# some animations of level transitions, to main menu (between screens)
+
 
 class Direction(enum.Enum):
     RIGHT = 0
@@ -97,8 +100,8 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.init1lvlEnemies = 0
-        self.init2lvlEnemies = 3
+        self.init1lvlEnemies = 2
+        self.init2lvlEnemies = 0
         self.init3lvlEnemies = 0
         self.init4lvlEnemies = 0  # mines
 
@@ -127,12 +130,11 @@ class App:
         self.menuButton = 1
 
         self.initSpeed = 1
-        self.initMultipler = 1.1
+        self.initMultiplier = 1.1
         self.speedlvl = []
         self.speedlvl.append(self.initSpeed)
-        self.speedlvl.append(self.initMultipler * self.speedlvl[0])
-        self.speedlvl.append(self.initMultipler * self.speedlvl[1])
-        self.speedlvl.append(self.initMultipler * self.speedlvl[2])
+        self.speedlvl.append(self.initMultiplier * self.speedlvl[0])
+        self.speedlvl.append(self.initMultiplier * self.speedlvl[1])
 
         self.level = 1
         self.hardModeLevel = 5
@@ -148,8 +150,6 @@ class App:
             self.timeLastFrame.append(time.time())
             self.dt.append(0)
             self.timeSinceLastMove.append(0)
-
-        self.InitializeObjects()
 
         pyxel.run(self.UpdateMenu, self.DrawMenu)
 
@@ -181,18 +181,23 @@ class App:
 
     def DrawMenu(self):
         pyxel.rect(0, 0, self.gameSizeX, self.gameSizeY, 1)
+
         if self.menuButton == 1:
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", 10)
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", 7)
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", 7)
+            text1 = 10
+            text2 = 7
+            text3 = 7
         elif self.menuButton == 2:
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", 7)
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", 10)
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", 7)
+            text1 = 7
+            text2 = 10
+            text3 = 7
         else:
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", 7)
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", 7)
-            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", 10)
+            text1 = 7
+            text2 = 7
+            text3 = 10
+
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", text1)
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", text2)
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", text3)
 
     def Update(self):
         if self.menu:
@@ -231,7 +236,7 @@ class App:
             self.timeSinceLastMove[1] = 0
 
         if self.timeSinceLastMove[2] >= self.speedlvl[2]:
-            for i in range(self.nOf3LvlEnemies):
+            for i in range(self.nOf3LvlEnemies):  # every move towards player
                 self.MoveEnemy(i, lvl=3, moveTowardsPlayer=True)
 
             self.timeSinceLastMove[2] = 0
@@ -241,36 +246,27 @@ class App:
             self.endGame = False
 
         elif pyxel.btnp(pyxel.KEY_Q):
-            pyxel.cls(2)
             self.menu = True
 
         elif pyxel.btnp(pyxel.KEY_1):
             self.enemy1lvl.pop(0)
             self.nOf1LvlEnemies -= 1
             self.nOfEnemies -= 1
-            if self.nOfEnemies == 0:
-                self.NextLevel()
 
         elif pyxel.btnp(pyxel.KEY_2):
             self.enemy2lvl.pop(0)
             self.nOf2LvlEnemies -= 1
             self.nOfEnemies -= 1
-            if self.nOfEnemies == 0:
-                self.NextLevel()
 
         elif pyxel.btnp(pyxel.KEY_3):
             self.enemy3lvl.pop(0)
             self.nOf3LvlEnemies -= 1
             self.nOfEnemies -= 1
-            if self.nOfEnemies == 0:
-                self.NextLevel()
 
         elif pyxel.btnp(pyxel.KEY_4):
             self.enemy4lvl.pop(0)
             self.nOf4LvlEnemies -= 1
             self.nOfEnemies -= 1
-            if self.nOfEnemies == 0:
-                self.NextLevel()
 
     def Draw(self):
         if self.endGame:
@@ -296,7 +292,8 @@ class App:
         self.enemy1lvl = []
         self.enemy2lvl = []
         self.enemy3lvl = []
-        self.enemy4lvl = []
+        self.enemy4lvl = []  # mines
+
         maxSizeX = int(self.gameSizeX / 8) - 1
         maxSizeY = int(self.gameSizeY / 8) - 1
 
@@ -331,7 +328,7 @@ class App:
             self.walls.append(Wall(0, i * 8))
             self.walls.append(Wall(self.gameSizeX - 8, i * 8))
 
-        while len(self.walls) < self.nOfAllWalls:  # hard walls
+        while len(self.walls) < self.nOfAllWalls:  # normal walls
             Xrand = int(random.randrange(1, maxSizeX))
             Yrand = int(random.randrange(1, maxSizeY))
             add = True
@@ -347,8 +344,6 @@ class App:
         self.player = Player(playerPosX * 8, playerPosY * 8)
 
         self.InitializeEnemies()
-
-        self.nOfEnemies = self.nOf1LvlEnemiesBuff + self.nOf2LvlEnemiesBuff + self.nOf3LvlEnemiesBuff + self.nOf4LvlEnemiesBuff
 
     def InitializeEnemies(self):
         self.nOf1LvlEnemies = self.nOf1LvlEnemiesBuff
@@ -399,12 +394,14 @@ class App:
                     self.enemy4lvl.pop()
                     break
 
+        self.nOfEnemies = self.nOf1LvlEnemiesBuff + self.nOf2LvlEnemiesBuff + self.nOf3LvlEnemiesBuff + self.nOf4LvlEnemiesBuff
+
     def IsPlayerAround(self, Xrand, Yrand, j):
         PlayerPosX = int(self.player.x / 8)
         PlayerPosY = int(self.player.y / 8)
         if int(self.walls[j].x / 8) == Xrand and int(self.walls[j].y / 8) == Yrand:  # if enemy spawns on walls
             return True
-        elif PlayerPosX == Xrand and PlayerPosY == Yrand:
+        elif PlayerPosX == Xrand and PlayerPosY == Yrand:  # if enemy spawns on player
             return True
         else:
             return False
@@ -420,7 +417,7 @@ class App:
             elif pyxel.btnp(pyxel.KEY_RIGHT):
                 self.player.x += self.player.w
 
-            for j in range(self.nOf1LvlEnemies):
+            for j in range(self.nOf1LvlEnemies):  # check losing game after player move
                 if self.player.x == self.enemy1lvl[j].x and self.player.y == self.enemy1lvl[j].y:
                     self.endGame = True
 
@@ -440,10 +437,10 @@ class App:
         if lvl == 1:
             self.MoveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy1lvl, self.nOf1LvlEnemies)
 
-        if lvl == 2:
+        elif lvl == 2:
             self.MoveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy2lvl, self.nOf2LvlEnemies)
 
-        if lvl == 3:
+        elif lvl == 3:
             self.MoveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy3lvl, self.nOf3LvlEnemies)
 
     def MoveEnemyLevel(self, whichEnemy, lvl, moveTowardsPlayer, obj, nOfEnemies):
@@ -464,14 +461,14 @@ class App:
 
         if self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=move):
             obj[whichEnemy].MoveEnemy(move)
-        else:  # when trapped
+        else:  # make no move when trapped
             if self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.LEFT) or \
                     self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.RIGHT) or \
                     self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.UP) or \
                     self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.DOWN):
                 self.MoveEnemy(whichEnemy, lvl)
 
-        for i in range(nOfEnemies):  # check for losing the game
+        for i in range(nOfEnemies):  # check losing game after enemy move
             if self.player.x == obj[i].x and self.player.y == obj[i].y:
                 self.endGame = True
 
@@ -500,11 +497,11 @@ class App:
                 if self.walls[i].x == x and self.walls[i].y == y:
                     return False
             return True
-        else:
+        else:  # player or wall
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
                     if self.level >= self.hardModeLevel and whatObj == "player":  # game over when stepped on yellow
-                        if i < self.nOfHardWalls:  # wall after certain level
+                        if i < self.nOfHardWalls:  # wall becomes explosive after certain level
                             self.endGame = True
                             self.DrawGameOver()
                             return False
@@ -523,6 +520,9 @@ class App:
         self.Execute3lvlEnemies()
         self.Execute4lvlEnemies()
 
+        if self.nOfEnemies == 0:
+            self.NextLevel()
+
     def Execute1lvlEnemies(self):
         continueLoops = True
         for i in range(self.nOf1LvlEnemies):
@@ -535,8 +535,6 @@ class App:
                             self.nOfEnemies -= 1
                             continueLoops = False
                             break
-        if self.nOfEnemies == 0:
-            self.NextLevel()
 
     def Execute2lvlEnemies(self):
         continueLoops = True
@@ -550,8 +548,6 @@ class App:
                             self.nOfEnemies -= 1
                             continueLoops = False
                             break
-        if self.nOfEnemies == 0:
-            self.NextLevel()
 
     def Execute3lvlEnemies(self):
         continueLoops = True
@@ -565,8 +561,6 @@ class App:
                             self.nOfEnemies -= 1
                             continueLoops = False
                             break
-        if self.nOfEnemies == 0:
-            self.NextLevel()
 
     def Execute4lvlEnemies(self):
         continueLoops = True
@@ -580,8 +574,6 @@ class App:
                             self.nOfEnemies -= 1
                             continueLoops = False
                             break
-        if self.nOfEnemies == 0:
-            self.NextLevel()
 
     def NextLevel(self):
         self.level += 1
@@ -593,18 +585,17 @@ class App:
             if self.nOf2LvlEnemiesBuff < self.max2lvlEnemies:
                 self.nOf2LvlEnemiesBuff += 1
 
-        if self.level >= self.hardModeLevel + self.max2lvlEnemies + self.max3lvlEnemies:
+        if self.level >= self.hardModeLevel + self.max2lvlEnemies + self.max3lvlEnemies + 2:
             if self.nOf3LvlEnemiesBuff < self.max3lvlEnemies:
                 self.nOf3LvlEnemiesBuff += 1
 
-        if self.level >= self.hardModeLevel + self.max2lvlEnemies + self.max3lvlEnemies:
+        if self.level >= self.hardModeLevel + self.max2lvlEnemies + self.max3lvlEnemies:  # mines
             if self.nOf4LvlEnemiesBuff < self.max4lvlEnemies:
                 self.nOf4LvlEnemiesBuff += 1
 
         self.speedlvl[0] *= 0.9
         self.InitializeObjects()
         self.endGame = False
-        print("level: ", self.level)
 
     def DrawLevel(self, level):
         levelText = "Level " + str(level)
@@ -624,7 +615,9 @@ class App:
             self.walls[i].Draw()
 
     def DrawGameOver(self):
-        pyxel.blt(90, 50, 0, 0, 8, 72, 16)
+        pyxel.rect(0, 0, self.gameSizeX, self.gameSizeY, 1)
+        pyxel.text(int(self.gameSizeX / 2) - 19, int(self.gameSizeY / 2 - 20), "GAME OVER", 7)
+        pyxel.text(int(self.gameSizeX / 2) - 39, int(self.gameSizeY / 2 - 10), "(PRESS 'R' TO RESET)", 7)
 
     def DrawEnemies(self):
         for i in range(self.nOf1LvlEnemies):
@@ -654,9 +647,8 @@ class App:
 
         self.speedlvl = []
         self.speedlvl.append(self.initSpeed)
-        self.speedlvl.append(self.initMultipler * self.speedlvl[0])
-        self.speedlvl.append(self.initMultipler * self.speedlvl[1])
-        self.speedlvl.append(self.initMultipler * self.speedlvl[2])
+        self.speedlvl.append(self.initMultiplier * self.speedlvl[0])
+        self.speedlvl.append(self.initMultiplier * self.speedlvl[1])
 
 
 App()
