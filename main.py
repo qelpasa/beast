@@ -100,8 +100,8 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.init1lvlEnemies = 2
-        self.init2lvlEnemies = 0
+        self.init1lvlEnemies = 0
+        self.init2lvlEnemies = 3
         self.init3lvlEnemies = 0
         self.init4lvlEnemies = 0  # mines
 
@@ -115,10 +115,10 @@ class App:
         self.nOf3LvlEnemiesBuff = self.init3lvlEnemies
         self.nOf4LvlEnemiesBuff = self.init4lvlEnemies
 
-        self.max1lvlEnemies = 5
-        self.max2lvlEnemies = 3
-        self.max3lvlEnemies = 1
-        self.max4lvlEnemies = 5  # mines
+        self.max1lvlEnemies = 0
+        self.max2lvlEnemies = 10
+        self.max3lvlEnemies = 0
+        self.max4lvlEnemies = 0  # mines
 
         self.nOfEnemies = self.nOf1LvlEnemies
         self.nOfEnemiesBuff = self.nOfEnemies
@@ -545,7 +545,7 @@ class App:
                             continueLoops = False
                             break
 
-    def Execute2lvlEnemies(self):
+    def Execute2lvlEnemies(self):  # TODO
         continueLoops = True
         for i in range(self.nOf2LvlEnemies):
             if continueLoops:
@@ -558,7 +558,7 @@ class App:
                             continueLoops = False
                             break
 
-    def Execute3lvlEnemies(self):
+    def Execute3lvlEnemies(self):  ## TODO
         continueLoops = True
         for i in range(self.nOf3LvlEnemies):
             if continueLoops:
@@ -602,7 +602,7 @@ class App:
             if self.nOf4LvlEnemiesBuff < self.max4lvlEnemies:
                 self.nOf4LvlEnemiesBuff += 1
 
-        self.speedlvl[0] *= 0.9
+        self.speedlvl[0] *= 0.95
         self.InitializeObjects()
         self.endGame = False
 
