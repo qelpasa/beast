@@ -8,6 +8,7 @@ import random
 # pyxeleditor resources.pyres.pyxres
 # TODO
 # Best perks
+# cant exit game in main menu
 
 class Direction(enum.Enum):
     RIGHT = 0
@@ -96,18 +97,23 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.nOf1LvlEnemies = 5
-        self.nOf2LvlEnemies = 5
-        self.nOf3LvlEnemies = 0
-        self.nOf4LvlEnemies = 0  # mines
+        self.init1lvlEnemies = 2
+        self.init2lvlEnemies = 0
+        self.init3lvlEnemies = 0
+        self.init4lvlEnemies = 0  # mines
 
-        self.nOf1LvlEnemiesBuff = self.nOf1LvlEnemies
-        self.nOf2LvlEnemiesBuff = self.nOf2LvlEnemies
-        self.nOf3LvlEnemiesBuff = self.nOf3LvlEnemies
-        self.nOf4LvlEnemiesBuff = self.nOf4LvlEnemies
+        self.nOf1LvlEnemies = self.init1lvlEnemies
+        self.nOf2LvlEnemies = self.init2lvlEnemies
+        self.nOf3LvlEnemies = self.init3lvlEnemies
+        self.nOf4LvlEnemies = self.init4lvlEnemies
+
+        self.nOf1LvlEnemiesBuff = self.init1lvlEnemies
+        self.nOf2LvlEnemiesBuff = self.init2lvlEnemies
+        self.nOf3LvlEnemiesBuff = self.init3lvlEnemies
+        self.nOf4LvlEnemiesBuff = self.init4lvlEnemies
 
         self.max1lvlEnemies = 5
-        self.max2lvlEnemies = 5
+        self.max2lvlEnemies = 3
         self.max3lvlEnemies = 1
         self.max4lvlEnemies = 5  # mines
 
@@ -117,13 +123,16 @@ class App:
 
         self.parity = 1
         self.endGame = False
-        self.Menu = False  # TODO make menu
+        self.menu = True  # TODO make menu
+        self.menuButton = 1
 
+        self.initSpeed = 1
+        self.initMultipler = 1.1
         self.speedlvl = []
-        self.speedlvl.append(1)
-        self.speedlvl.append(1.1 * self.speedlvl[0])
-        self.speedlvl.append(1.1 * self.speedlvl[1])
-        self.speedlvl.append(1.1 * self.speedlvl[2])
+        self.speedlvl.append(self.initSpeed)
+        self.speedlvl.append(self.initMultipler * self.speedlvl[0])
+        self.speedlvl.append(self.initMultipler * self.speedlvl[1])
+        self.speedlvl.append(self.initMultipler * self.speedlvl[2])
 
         self.level = 1
         self.hardModeLevel = 5
@@ -142,9 +151,53 @@ class App:
 
         self.initializeObjects()
 
-        pyxel.run(self.update, self.draw)
+        pyxel.run(self.updateMenu, self.drawMenu)
+
+    def updateMenu(self):
+        if not self.menu:
+            pyxel.run(self.update, self.draw)
+
+        if pyxel.btnp(pyxel.KEY_UP):
+            if self.menuButton == 3:
+                self.menuButton = 1
+            else:
+                self.menuButton += 1
+
+        if pyxel.btnp(pyxel.KEY_DOWN):
+            if self.menuButton == 1:
+                self.menuButton = 3
+            else:
+                self.menuButton -= 1
+
+        if pyxel.btnp(pyxel.KEY_ENTER):
+            if self.menuButton == 1:
+                self.resetValues()
+                self.initializeObjects()  # TODO reset all valaues
+                self.menu = False
+            elif self.menuButton == 2:
+                print("Authors")
+            else:
+                quit()  # TODO how to exit??
+
+    def drawMenu(self):
+        pyxel.rect(0, 0, self.gameSizeX, self.gameSizeY, 1)
+        if self.menuButton == 1:
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", 10)
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", 7)
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", 7)
+        elif self.menuButton == 2:
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", 7)
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", 10)
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", 7)
+        else:
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", 7)
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", 7)
+            pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", 10)
 
     def update(self):
+        if self.menu:
+            pyxel.run(self.updateMenu, self.drawMenu)
+
         self.movePlayer()
         self.executeEnemies()
         timeThisFrame = []
@@ -186,6 +239,10 @@ class App:
         if pyxel.btnp(pyxel.KEY_R):
             self.initializeObjects()
             self.endGame = False
+
+        elif pyxel.btnp(pyxel.KEY_Q):
+            pyxel.cls(2)
+            self.menu = True
 
         elif pyxel.btnp(pyxel.KEY_1):
             self.enemy1lvl.pop(0)
@@ -559,7 +616,7 @@ class App:
             if self.nOf2LvlEnemiesBuff < self.max2lvlEnemies:
                 self.nOf2LvlEnemiesBuff += 1
 
-        if self.level >= self.hardModeLevel + self.max2lvlEnemies:
+        if self.level >= self.hardModeLevel + self.max2lvlEnemies + self.max3lvlEnemies:
             if self.nOf3LvlEnemiesBuff < self.max3lvlEnemies:
                 self.nOf3LvlEnemiesBuff += 1
 
@@ -581,6 +638,25 @@ class App:
         levelText = "Beasts " + str(number)
         pyxel.rect(48, 0, len(levelText) * pyxel.FONT_WIDTH + 1, 8, 5)
         pyxel.text(49, 1, levelText, 7)
+
+    def resetValues(self):
+        self.level = 1
+        self.nOf1LvlEnemiesBuff = self.init1lvlEnemies
+        self.nOf2LvlEnemiesBuff = self.init2lvlEnemies
+        self.nOf3LvlEnemiesBuff = self.init3lvlEnemies
+        self.nOf4LvlEnemiesBuff = self.init4lvlEnemies  # mines
+
+        self.nOfEnemies = self.nOf1LvlEnemies
+        self.nOfEnemiesBuff = self.nOfEnemies
+        self.maxNumOfEnemies = self.max1lvlEnemies + self.max2lvlEnemies + self.max3lvlEnemies + self.max4lvlEnemies
+        self.endGame = False
+        self.menuButton = 1
+
+        self.speedlvl = []
+        self.speedlvl.append(self.initSpeed)
+        self.speedlvl.append(self.initMultipler * self.speedlvl[0])
+        self.speedlvl.append(self.initMultipler * self.speedlvl[1])
+        self.speedlvl.append(self.initMultipler * self.speedlvl[2])
 
 
 App()
