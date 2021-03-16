@@ -510,6 +510,18 @@ class App:
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
                     return False
+            for j in range(self.nOf1LvlEnemies):
+                if self.enemy1lvl[j].x == x and self.enemy1lvl[j].y == y:
+                    return False
+            for j in range(self.nOf2LvlEnemies):
+                if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
+                    return False
+            for j in range(self.nOf3LvlEnemies):
+                if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
+                    return False
+            for j in range(self.nOf4LvlEnemies):
+                if self.enemy4lvl[j].x == x and self.enemy4lvl[j].y == y:
+                    return False
             return True
         else:  # player or wall
             for i in range(self.nOfAllWalls):
