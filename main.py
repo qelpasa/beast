@@ -8,7 +8,7 @@ import random
 # pyxeleditor resources.pyres.pyxres
 
 # TODO
-# 3 lvl Best perks
+# level 4 enemies should try yo kill player
 # cant exit game in main menu
 # some animations of level transitions, to main menu (between screens)
 
