@@ -100,9 +100,9 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.init1lvlEnemies = 3
+        self.init1lvlEnemies = 0
         self.init2lvlEnemies = 0
-        self.init3lvlEnemies = 0
+        self.init3lvlEnemies = 1
         self.init4lvlEnemies = 0  # mines
 
         self.nOf1LvlEnemies = self.init1lvlEnemies
@@ -115,10 +115,10 @@ class App:
         self.nOf3LvlEnemiesBuff = self.init3lvlEnemies
         self.nOf4LvlEnemiesBuff = self.init4lvlEnemies
 
-        self.max1lvlEnemies = 5
-        self.max2lvlEnemies = 3
-        self.max3lvlEnemies = 2
-        self.max4lvlEnemies = 5  # mines
+        self.max1lvlEnemies = 0
+        self.max2lvlEnemies = 0
+        self.max3lvlEnemies = 1
+        self.max4lvlEnemies = 0  # mines
 
         self.nOfEnemies = self.nOf1LvlEnemies
         self.nOfEnemiesBuff = self.nOfEnemies
@@ -129,7 +129,7 @@ class App:
         self.menu = True
         self.menuButton = 1
 
-        self.initSpeed = 1
+        self.initSpeed = 0.7
         self.speedMiltiplier = 1.3
         self.speedlvl = []
         self.speedlvl.append(self.initSpeed)
@@ -268,6 +268,9 @@ class App:
             self.nOf4LvlEnemies -= 1
             self.nOfEnemies -= 1
 
+        elif pyxel.btnp(pyxel.KEY_SPACE):
+            self.walls[120].MoveWall(Direction.UP)
+
     def Draw(self):
         if self.endGame:
             pyxel.cls(0)
@@ -279,7 +282,7 @@ class App:
             self.DrawEnemies()
 
             self.DrawLevel(self.level)
-            self.DrawNOfBeasts(self.nOfEnemies)
+            self.DrawNOfEnemies(self.nOfEnemies)
 
     def InitializeObjects(self):  # walls, enemies and player
         for i in range(4):
@@ -509,19 +512,19 @@ class App:
         if whatObj == "enemy":
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
-                    return False
+                    return False  # walls collision
             for j in range(self.nOf1LvlEnemies):
                 if self.enemy1lvl[j].x == x and self.enemy1lvl[j].y == y:
-                    return False
+                    return False  # other enemies collision
             for j in range(self.nOf2LvlEnemies):
                 if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
-                    return False
+                    return False  # other enemies collision
             for j in range(self.nOf3LvlEnemies):
                 if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
-                    return False
+                    return False  # other enemies collision
             for j in range(self.nOf4LvlEnemies):
                 if self.enemy4lvl[j].x == x and self.enemy4lvl[j].y == y:
-                    return False
+                    return False  # other enemies collision
             return True
         else:  # player or wall
             for i in range(self.nOfAllWalls):
@@ -591,13 +594,13 @@ class App:
                 for j in range(self.nOfAllWalls):
                     if continueLoops:
                         if self.walls[j].x == self.enemy2lvl[i].x and self.walls[j].y == self.enemy2lvl[i].y:
-                                self.enemy2lvl.pop(i)
-                                self.nOf2LvlEnemies -= 1
-                                self.nOfEnemies -= 1
-                                continueLoops = False
-                                break
+                            self.enemy2lvl.pop(i)
+                            self.nOf2LvlEnemies -= 1
+                            self.nOfEnemies -= 1
+                            continueLoops = False
+                            break
 
-    def Execute3lvlEnemies(self):  # TODO
+    def Execute3lvlEnemies(self):
         continueLoops = True
         for i in range(self.nOf3LvlEnemies):
             if continueLoops:
@@ -650,7 +653,7 @@ class App:
         pyxel.rect(8, 0, len(levelText) * pyxel.FONT_WIDTH + 1, 8, 5)
         pyxel.text(9, 1, levelText, 7)
 
-    def DrawNOfBeasts(self, number):
+    def DrawNOfEnemies(self, number):
         levelText = "Beasts " + str(number)
         pyxel.rect(48, 0, len(levelText) * pyxel.FONT_WIDTH + 1, 8, 5)
         pyxel.text(49, 1, levelText, 7)
