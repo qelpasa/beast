@@ -130,11 +130,11 @@ class App:
         self.menuButton = 1
 
         self.initSpeed = 1
-        self.initMultiplier = 1.1
+        self.speedMiltiplier = 1.3
         self.speedlvl = []
         self.speedlvl.append(self.initSpeed)
-        self.speedlvl.append(self.initMultiplier * self.speedlvl[0])
-        self.speedlvl.append(self.initMultiplier * self.speedlvl[1])
+        self.speedlvl.append(self.speedMiltiplier * self.speedlvl[0])
+        self.speedlvl.append(self.speedMiltiplier * self.speedlvl[1])
 
         self.level = 1
         self.hardModeLevel = 5
@@ -285,8 +285,8 @@ class App:
         for i in range(4):
             self.timeSinceLastMove[i] = -0.5
 
-        self.speedlvl[1] = 0.9 * self.speedlvl[0]
-        self.speedlvl[2] = 0.9 * self.speedlvl[1]
+        self.speedlvl[1] = self.speedMiltiplier * self.speedlvl[0]
+        self.speedlvl[2] = self.speedMiltiplier * self.speedlvl[1]
 
         self.walls = []
         self.enemy1lvl = []
@@ -484,27 +484,27 @@ class App:
     def CheckCollision(self, obj, whatObj="notEnemy", EnemyDirection=-1):  # True for no collision
         x = obj.x
         y = obj.y
-        xForLvl2 = x
-        yForLvl2 = y
+        nextX = x
+        nextY = y
         if pyxel.btnp(pyxel.KEY_DOWN) or EnemyDirection == Direction.DOWN:
             y += obj.h
             direction = Direction.DOWN
-            yForLvl2 = y + obj.h
+            nextY = y + obj.h
 
         elif pyxel.btnp(pyxel.KEY_UP) or EnemyDirection == Direction.UP:
             y -= obj.h
             direction = Direction.UP
-            yForLvl2 = y - obj.h
+            nextY = y - obj.h
 
         elif pyxel.btnp(pyxel.KEY_LEFT) or EnemyDirection == Direction.LEFT:
             x -= obj.w
             direction = Direction.LEFT
-            xForLvl2 = x - obj.w
+            nextX = x - obj.w
 
         elif pyxel.btnp(pyxel.KEY_RIGHT) or EnemyDirection == Direction.RIGHT:
             x += obj.w
             direction = Direction.RIGHT
-            xForLvl2 = x + obj.w
+            nextX = x + obj.w
 
         if whatObj == "enemy":
             for i in range(self.nOfAllWalls):
@@ -512,17 +512,27 @@ class App:
                     return False
             return True
         else:  # player or wall
-
             for i in range(self.nOfAllWalls):
-                if self.walls[i].x == xForLvl2 and self.walls[i].y == yForLvl2:
+                if self.walls[i].x == nextX and self.walls[i].y == nextY:
                     for j in range(self.nOf2LvlEnemies):
                         if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
-                            return False  # for 2lvl enemies (smash between walls)
+                            return False  # for 2lvl enemies (smash enemy between walls)
             for i in range(self.nOfAllWalls):
                 if whatObj != "player":
                     for j in range(self.nOf2LvlEnemies):
                         if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
-                            return True  # for 2lvl enemies (doesnt let smash not between walls)
+                            return True  # for 2lvl enemies (doesnt let smash enemy not between walls)
+
+            for i in range(self.nOfHardWalls):
+                if self.walls[i].x == nextX and self.walls[i].y == nextY:
+                    for j in range(self.nOf3LvlEnemies):
+                        if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
+                            return False  # for 3lvl enemies (smash enemy between normal and hard wall)
+            for i in range(self.nOfHardWalls):
+                if whatObj != "player":
+                    for j in range(self.nOf3LvlEnemies):
+                        if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
+                            return True  # for 3lvl enemies (doesnt let smash enemy not between normal and hard wall)
 
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
@@ -569,16 +579,6 @@ class App:
                 for j in range(self.nOfAllWalls):
                     if continueLoops:
                         if self.walls[j].x == self.enemy2lvl[i].x and self.walls[j].y == self.enemy2lvl[i].y:
-                            #if pyxel.btnp(pyxel.KEY_DOWN):
-                            #    direction = Direction.DOWN
-                            #elif pyxel.btnp(pyxel.KEY_UP):
-                            #    direction = Direction.UP
-                            #elif pyxel.btnp(pyxel.KEY_LEFT):
-                            #    direction = Direction.LEFT
-                            #elif pyxel.btnp(pyxel.KEY_RIGHT):
-                            #    direction = Direction.RIGHT
-
-                            #if not self.CheckCollision(self.enemy2lvl[i], whatObj="enemy", EnemyDirection=direction, EnemyLevel=2):
                                 self.enemy2lvl.pop(i)
                                 self.nOf2LvlEnemies -= 1
                                 self.nOfEnemies -= 1
@@ -683,8 +683,8 @@ class App:
 
         self.speedlvl = []
         self.speedlvl.append(self.initSpeed)
-        self.speedlvl.append(self.initMultiplier * self.speedlvl[0])
-        self.speedlvl.append(self.initMultiplier * self.speedlvl[1])
+        self.speedlvl.append(self.speedMiltiplier * self.speedlvl[0])
+        self.speedlvl.append(self.speedMiltiplier * self.speedlvl[1])
 
 
 App()
