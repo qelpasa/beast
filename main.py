@@ -8,7 +8,7 @@ import random
 # pyxeleditor resources.pyres.pyxres
 
 # TODO
-# Best perks
+# 3 lvl Best perks
 # cant exit game in main menu
 # some animations of level transitions, to main menu (between screens)
 
@@ -100,8 +100,8 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.init1lvlEnemies = 0
-        self.init2lvlEnemies = 3
+        self.init1lvlEnemies = 3
+        self.init2lvlEnemies = 0
         self.init3lvlEnemies = 0
         self.init4lvlEnemies = 0  # mines
 
@@ -115,10 +115,10 @@ class App:
         self.nOf3LvlEnemiesBuff = self.init3lvlEnemies
         self.nOf4LvlEnemiesBuff = self.init4lvlEnemies
 
-        self.max1lvlEnemies = 0
-        self.max2lvlEnemies = 10
-        self.max3lvlEnemies = 0
-        self.max4lvlEnemies = 0  # mines
+        self.max1lvlEnemies = 5
+        self.max2lvlEnemies = 3
+        self.max3lvlEnemies = 2
+        self.max4lvlEnemies = 5  # mines
 
         self.nOfEnemies = self.nOf1LvlEnemies
         self.nOfEnemiesBuff = self.nOfEnemies
@@ -484,22 +484,27 @@ class App:
     def CheckCollision(self, obj, whatObj="notEnemy", EnemyDirection=-1):  # True for no collision
         x = obj.x
         y = obj.y
-
+        xForLvl2 = x
+        yForLvl2 = y
         if pyxel.btnp(pyxel.KEY_DOWN) or EnemyDirection == Direction.DOWN:
             y += obj.h
             direction = Direction.DOWN
+            yForLvl2 = y + obj.h
 
         elif pyxel.btnp(pyxel.KEY_UP) or EnemyDirection == Direction.UP:
             y -= obj.h
             direction = Direction.UP
+            yForLvl2 = y - obj.h
 
         elif pyxel.btnp(pyxel.KEY_LEFT) or EnemyDirection == Direction.LEFT:
             x -= obj.w
             direction = Direction.LEFT
+            xForLvl2 = x - obj.w
 
         elif pyxel.btnp(pyxel.KEY_RIGHT) or EnemyDirection == Direction.RIGHT:
             x += obj.w
             direction = Direction.RIGHT
+            xForLvl2 = x + obj.w
 
         if whatObj == "enemy":
             for i in range(self.nOfAllWalls):
@@ -507,6 +512,18 @@ class App:
                     return False
             return True
         else:  # player or wall
+
+            for i in range(self.nOfAllWalls):
+                if self.walls[i].x == xForLvl2 and self.walls[i].y == yForLvl2:
+                    for j in range(self.nOf2LvlEnemies):
+                        if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
+                            return False  # for 2lvl enemies (smash between walls)
+            for i in range(self.nOfAllWalls):
+                if whatObj != "player":
+                    for j in range(self.nOf2LvlEnemies):
+                        if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
+                            return True  # for 2lvl enemies (doesnt let smash not between walls)
+
             for i in range(self.nOfAllWalls):
                 if self.walls[i].x == x and self.walls[i].y == y:
                     if self.level >= self.hardModeLevel and whatObj == "player":  # game over when stepped on yellow
@@ -545,20 +562,30 @@ class App:
                             continueLoops = False
                             break
 
-    def Execute2lvlEnemies(self):  # TODO
+    def Execute2lvlEnemies(self):
         continueLoops = True
         for i in range(self.nOf2LvlEnemies):
             if continueLoops:
                 for j in range(self.nOfAllWalls):
                     if continueLoops:
                         if self.walls[j].x == self.enemy2lvl[i].x and self.walls[j].y == self.enemy2lvl[i].y:
-                            self.enemy2lvl.pop(i)
-                            self.nOf2LvlEnemies -= 1
-                            self.nOfEnemies -= 1
-                            continueLoops = False
-                            break
+                            #if pyxel.btnp(pyxel.KEY_DOWN):
+                            #    direction = Direction.DOWN
+                            #elif pyxel.btnp(pyxel.KEY_UP):
+                            #    direction = Direction.UP
+                            #elif pyxel.btnp(pyxel.KEY_LEFT):
+                            #    direction = Direction.LEFT
+                            #elif pyxel.btnp(pyxel.KEY_RIGHT):
+                            #    direction = Direction.RIGHT
 
-    def Execute3lvlEnemies(self):  ## TODO
+                            #if not self.CheckCollision(self.enemy2lvl[i], whatObj="enemy", EnemyDirection=direction, EnemyLevel=2):
+                                self.enemy2lvl.pop(i)
+                                self.nOf2LvlEnemies -= 1
+                                self.nOfEnemies -= 1
+                                continueLoops = False
+                                break
+
+    def Execute3lvlEnemies(self):  # TODO
         continueLoops = True
         for i in range(self.nOf3LvlEnemies):
             if continueLoops:
