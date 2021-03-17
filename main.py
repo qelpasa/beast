@@ -270,8 +270,29 @@ class App:
             self.nOf4LvlEnemies -= 1
             self.nOfEnemies -= 1
 
-        elif pyxel.btnp(pyxel.KEY_SPACE):
-            self.walls[120].MoveWall(Direction.UP)
+        elif pyxel.btnp(pyxel.KEY_A):
+            if not self.CheckCollision(self.enemy3lvl[0], whatObj="enemy3lvl", EnemyDirection=Direction.LEFT):
+                self.enemy3lvl[0].MoveEnemy(Direction.LEFT)
+            else:  # make random move when cant move towadrs player
+                self.MoveEnemy(whichEnemy=0, lvl=3)
+
+        elif pyxel.btnp(pyxel.KEY_W):
+            if not self.CheckCollision(self.enemy3lvl[0], whatObj="enemy3lvl", EnemyDirection=Direction.UP):
+                self.enemy3lvl[0].MoveEnemy(Direction.UP)
+            else:  # make random move when cant move towadrs player
+                self.MoveEnemy(whichEnemy=0, lvl=3)
+
+        elif pyxel.btnp(pyxel.KEY_S):
+            if not self.CheckCollision(self.enemy3lvl[0], whatObj="enemy3lvl", EnemyDirection=Direction.DOWN):
+                self.enemy3lvl[0].MoveEnemy(Direction.DOWN)
+            else:  # make random move when cant move towadrs player
+                self.MoveEnemy(whichEnemy=0, lvl=3)
+        elif pyxel.btnp(pyxel.KEY_D):
+            if not self.CheckCollision(self.enemy3lvl[0], whatObj="enemy3lvl", EnemyDirection=Direction.RIGHT):
+                self.enemy3lvl[0].MoveEnemy(Direction.RIGHT)
+            else:  # make random move when cant move towadrs player
+                self.MoveEnemy(whichEnemy=0, lvl=3)
+
 
     def Draw(self):
         if self.endGame:
@@ -477,7 +498,8 @@ class App:
             if not self.CheckCollision(obj[whichEnemy], whatObj="enemy3lvl", EnemyDirection=move):
                 obj[whichEnemy].MoveEnemy(move)
             else:  # make random move when cant move towadrs player
-                self.MoveEnemy(lvl=3)
+                moveTowardsPlayer = False
+                self.MoveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy3lvl, self.nOf3LvlEnemies)
 
             for i in range(self.nOfAllWalls):  # kill player after enemyLvl3 move
                 if self.walls[i].x == self.player.x and self.walls[i].y == self.player.y:
@@ -549,7 +571,6 @@ class App:
                                 return True
                             else:
                                 self.walls[i].MoveWall(direction)
-                                print("XX")
                 return False
 
             else:
@@ -585,7 +606,7 @@ class App:
                         if i < self.nOfSideWalls:
                             return True
                         else:
-                            if self.CheckCollision(self.walls[i]):
+                            if self.CheckCollision(self.walls[i],EnemyDirection=direction):
                                 return True
                             else:
                                 self.walls[i].MoveWall(direction)
