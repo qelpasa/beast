@@ -523,46 +523,25 @@ class App:
         y = obj.y
         nextX = x
         nextY = y
-        if whatObj == "player":
-            if pyxel.btnp(pyxel.KEY_DOWN):
-                y += obj.h
-                direction = Direction.DOWN
-                nextY = y + obj.h
+        if pyxel.btnp(pyxel.KEY_DOWN) or EnemyDirection == Direction.DOWN:
+            y += obj.h
+            direction = Direction.DOWN
+            nextY = y + obj.h
 
-            elif pyxel.btnp(pyxel.KEY_UP):
-                y -= obj.h
-                direction = Direction.UP
-                nextY = y - obj.h
+        elif pyxel.btnp(pyxel.KEY_UP) or EnemyDirection == Direction.UP:
+            y -= obj.h
+            direction = Direction.UP
+            nextY = y - obj.h
 
-            elif pyxel.btnp(pyxel.KEY_LEFT):
-                x -= obj.w
-                direction = Direction.LEFT
-                nextX = x - obj.w
+        elif pyxel.btnp(pyxel.KEY_LEFT) or EnemyDirection == Direction.LEFT:
+            x -= obj.w
+            direction = Direction.LEFT
+            nextX = x - obj.w
 
-            elif pyxel.btnp(pyxel.KEY_RIGHT):
-                x += obj.w
-                direction = Direction.RIGHT
-                nextX = x + obj.w
-        else:  # player and enemies/wall moves dont cross each other
-            if EnemyDirection == Direction.DOWN:
-                y += obj.h
-                direction = Direction.DOWN
-                nextY = y + obj.h
-
-            elif EnemyDirection == Direction.UP:
-                y -= obj.h
-                direction = Direction.UP
-                nextY = y - obj.h
-
-            elif EnemyDirection == Direction.LEFT:
-                x -= obj.w
-                direction = Direction.LEFT
-                nextX = x - obj.w
-
-            elif EnemyDirection == Direction.RIGHT:
-                x += obj.w
-                direction = Direction.RIGHT
-                nextX = x + obj.w
+        elif pyxel.btnp(pyxel.KEY_RIGHT) or EnemyDirection == Direction.RIGHT:
+            x += obj.w
+            direction = Direction.RIGHT
+            nextX = x + obj.w
 
         if whatObj == "enemy":
             for i in range(self.nOfAllWalls):
@@ -583,19 +562,6 @@ class App:
             return True
         else:  # player, wall or enemy3lvl
             if whatObj == "enemy3lvl":  # enemylvl3 behaves like player
-                for j in range(self.nOf1LvlEnemies):
-                    if self.enemy1lvl[j].x == x and self.enemy1lvl[j].y == y:
-                        return True  # other enemies collision
-                for j in range(self.nOf2LvlEnemies):
-                    if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
-                        return True  # other enemies collision
-                for j in range(self.nOf3LvlEnemies):
-                    if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
-                        return True  # other enemies collision
-                for j in range(self.nOf4LvlEnemies):
-                    if self.enemy4lvl[j].x == x and self.enemy4lvl[j].y == y:
-                        return True  # other enemies collision
-
                 for i in range(self.nOfAllWalls):
                     if self.walls[i].x == x and self.walls[i].y == y:
                         if i < self.nOfSideWalls:
