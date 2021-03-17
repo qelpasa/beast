@@ -445,28 +445,36 @@ class App:
         if not self.CheckCollision(self.player, whatObj="player"):
             if pyxel.btnp(pyxel.KEY_DOWN):
                 self.player.y += self.player.h
+                self.sound("playermove")
             elif pyxel.btnp(pyxel.KEY_UP):
                 self.player.y -= self.player.h
+                self.sound("playermove")
             elif pyxel.btnp(pyxel.KEY_LEFT):
                 self.player.x -= self.player.w
+                self.sound("playermove")
             elif pyxel.btnp(pyxel.KEY_RIGHT):
                 self.player.x += self.player.w
+                self.sound("playermove")
 
             for j in range(self.nOf1LvlEnemies):  # check losing game after player move
                 if self.player.x == self.enemy1lvl[j].x and self.player.y == self.enemy1lvl[j].y:
                     self.endGame = True
+                    self.sound("gameover")
 
             for j in range(self.nOf2LvlEnemies):
                 if self.player.x == self.enemy2lvl[j].x and self.player.y == self.enemy2lvl[j].y:
                     self.endGame = True
+                    self.sound("gameover")
 
             for j in range(self.nOf3LvlEnemies):
                 if self.player.x == self.enemy3lvl[j].x and self.player.y == self.enemy3lvl[j].y:
                     self.endGame = True
+                    self.sound("gameover")
 
             for j in range(self.nOf4LvlEnemies):
                 if self.player.x == self.enemy4lvl[j].x and self.player.y == self.enemy4lvl[j].y:
                     self.endGame = True
+                    self.sound("gameover")
 
     def MoveEnemy(self, whichEnemy, lvl, moveTowardsPlayer=False):
         if lvl == 1:
@@ -497,16 +505,21 @@ class App:
         if lvl == 3:
             if not self.CheckCollision(obj[whichEnemy], whatObj="enemy3lvl", EnemyDirection=move):
                 obj[whichEnemy].MoveEnemy(move)
+                self.sound("enemymove")
             else:  # make random move when cant move towadrs player
                 moveTowardsPlayer = False
                 self.MoveEnemyLevel(whichEnemy, lvl, moveTowardsPlayer, self.enemy3lvl, self.nOf3LvlEnemies)
+                self.sound("enemymove")
 
             for i in range(self.nOfAllWalls):  # kill player after enemyLvl3 move
                 if self.walls[i].x == self.player.x and self.walls[i].y == self.player.y:
                     self.endGame = True
+                    self.sound("gameover")
 
         elif self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=move):
             obj[whichEnemy].MoveEnemy(move)
+            self.sound("enemymove")
+
         else:  # make no move when trapped
             if self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.LEFT) or \
                     self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.RIGHT) or \
@@ -517,6 +530,7 @@ class App:
         for i in range(self.nOfAllWalls):  # check for losing game after enemy move
             if self.player.x == self.walls[i].x and self.player.y == self.walls[i].y:
                 self.endGame = True
+                self.sound("gameover")
 
     def CheckCollision(self, obj, whatObj="notEnemy", EnemyDirection=-1):  # True for no collision
         x = obj.x
@@ -605,6 +619,7 @@ class App:
                                 return True
                             else:
                                 self.walls[i].MoveWall(direction)
+                                self.sound("wallmove")
                 return False
 
             else:
@@ -635,6 +650,7 @@ class App:
                         if self.level >= self.hardModeLevel and whatObj == "player":  # game over when stepped on yellow
                             if i < self.nOfHardWalls:  # wall becomes explosive after certain level
                                 self.endGame = True
+                                self.sound("gameover")
                                 self.DrawGameOver()
                                 return False
                         if i < self.nOfSideWalls:
@@ -644,6 +660,7 @@ class App:
                                 return True
                             else:
                                 self.walls[i].MoveWall(direction)
+                                self.sound("wallmove")
         return False
 
     def ExecuteEnemies(self):
@@ -782,5 +799,14 @@ class App:
         self.speedlvl.append(self.speedMiltiplier * self.speedlvl[0])
         self.speedlvl.append(self.speedMiltiplier * self.speedlvl[1])
 
+    def sound(self, what):
+        if what == "playermove":
+            pyxel.play(0, 0)
+        if what == "wallmove":
+            pyxel.play(1, 1)
+        if what == "gameover":
+            pyxel.play(1, 2)
+        if what == "enemymove":
+            pyxel.play(1, 3)
 
 App()
