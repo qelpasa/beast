@@ -8,7 +8,8 @@ import random
 # pyxeleditor resources.pyres.pyxres
 
 # TODO
-# level 4 enemies should try yo kill player
+# level 3 enemy gives error sometimes when moves, doesnt move more than 1 tile (often)
+# level 3 enemy moves after game over
 # cant exit game in main menu
 # some animations of level transitions, to main menu (between screens)
 
@@ -115,10 +116,10 @@ class App:
         self.nOf3LvlEnemiesBuff = self.init3lvlEnemies
         self.nOf4LvlEnemiesBuff = self.init4lvlEnemies
 
-        self.max1lvlEnemies = 0
-        self.max2lvlEnemies = 0
+        self.max1lvlEnemies = 5
+        self.max2lvlEnemies = 3
         self.max3lvlEnemies = 1
-        self.max4lvlEnemies = 0  # mines
+        self.max4lvlEnemies = 5  # mines
 
         self.nOfEnemies = self.nOf1LvlEnemies
         self.nOfEnemiesBuff = self.nOfEnemies
@@ -129,7 +130,7 @@ class App:
         self.menu = True
         self.menuButton = 1
 
-        self.initSpeed = 0.7
+        self.initSpeed = 1
         self.speedMiltiplier = 1.3
         self.speedlvl = []
         self.speedlvl.append(self.initSpeed)
@@ -137,7 +138,7 @@ class App:
         self.speedlvl.append(self.speedMiltiplier * self.speedlvl[1])
 
         self.level = 1
-        self.hardModeLevel = 5
+        self.hardModeLevel = 4
 
         pyxel.init(self.gameSizeX, self.gameSizeY, scale=5, caption="BEAST", fps=60)
         pyxel.load("assets/resources.pyres.pyxres")
@@ -203,8 +204,9 @@ class App:
         if self.menu:
             pyxel.run(self.UpdateMenu, self.DrawMenu)
 
-        self.MovePlayer()
-        self.ExecuteEnemies()
+        if not self.endGame:
+            self.MovePlayer()
+            self.ExecuteEnemies()
         timeThisFrame = []
 
         for i in range(4):
@@ -471,7 +473,17 @@ class App:
         else:
             move = random.choice(list(Direction))
 
-        if self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=move):
+        if lvl == 3:
+            if not self.CheckCollision(obj[whichEnemy], whatObj="enemy3lvl", EnemyDirection=move):
+                obj[whichEnemy].MoveEnemy(move)
+            else:  # make random move when cant move towadrs player
+                self.MoveEnemy(lvl=3)
+
+            for i in range(self.nOfAllWalls):  # kill player after enemyLvl3 move
+                if self.walls[i].x == self.player.x and self.walls[i].y == self.player.y:
+                    self.endGame = True
+
+        elif self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=move):
             obj[whichEnemy].MoveEnemy(move)
         else:  # make no move when trapped
             if self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.LEFT) or \
@@ -480,8 +492,8 @@ class App:
                     self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=Direction.DOWN):
                 self.MoveEnemy(whichEnemy, lvl)
 
-        for i in range(nOfEnemies):  # check losing game after enemy move
-            if self.player.x == obj[i].x and self.player.y == obj[i].y:
+        for i in range(self.nOfAllWalls):  # check for losing game after enemy move
+            if self.player.x == self.walls[i].x and self.player.y == self.walls[i].y:
                 self.endGame = True
 
     def CheckCollision(self, obj, whatObj="notEnemy", EnemyDirection=-1):  # True for no collision
@@ -526,43 +538,57 @@ class App:
                 if self.enemy4lvl[j].x == x and self.enemy4lvl[j].y == y:
                     return False  # other enemies collision
             return True
-        else:  # player or wall
-            for i in range(self.nOfAllWalls):
-                if self.walls[i].x == nextX and self.walls[i].y == nextY:
-                    for j in range(self.nOf2LvlEnemies):
-                        if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
-                            return False  # for 2lvl enemies (smash enemy between walls)
-            for i in range(self.nOfAllWalls):
-                if whatObj != "player":
-                    for j in range(self.nOf2LvlEnemies):
-                        if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
-                            return True  # for 2lvl enemies (doesnt let smash enemy not between walls)
-
-            for i in range(self.nOfHardWalls):
-                if self.walls[i].x == nextX and self.walls[i].y == nextY:
-                    for j in range(self.nOf3LvlEnemies):
-                        if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
-                            return False  # for 3lvl enemies (smash enemy between normal and hard wall)
-            for i in range(self.nOfHardWalls):
-                if whatObj != "player":
-                    for j in range(self.nOf3LvlEnemies):
-                        if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
-                            return True  # for 3lvl enemies (doesnt let smash enemy not between normal and hard wall)
-
-            for i in range(self.nOfAllWalls):
-                if self.walls[i].x == x and self.walls[i].y == y:
-                    if self.level >= self.hardModeLevel and whatObj == "player":  # game over when stepped on yellow
-                        if i < self.nOfHardWalls:  # wall becomes explosive after certain level
-                            self.endGame = True
-                            self.DrawGameOver()
-                            return False
-                    if i < self.nOfSideWalls:
-                        return True
-                    else:
-                        if self.CheckCollision(self.walls[i]):
+        else:  # player, wall or enemy3lvl
+            if whatObj == "enemy3lvl":  # enemylvl3 behaves like player
+                for i in range(self.nOfAllWalls):
+                    if self.walls[i].x == x and self.walls[i].y == y:
+                        if i < self.nOfSideWalls:
                             return True
                         else:
-                            self.walls[i].MoveWall(direction)
+                            if self.CheckCollision(self.walls[i], EnemyDirection=direction):
+                                return True
+                            else:
+                                self.walls[i].MoveWall(direction)
+                                print("XX")
+                return False
+
+            else:
+                for i in range(self.nOfAllWalls):
+                    if self.walls[i].x == nextX and self.walls[i].y == nextY:
+                        for j in range(self.nOf2LvlEnemies):
+                            if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
+                                return False  # for 2lvl enemies (smash enemy between walls)
+                for i in range(self.nOfAllWalls):
+                    if whatObj != "player":
+                        for j in range(self.nOf2LvlEnemies):
+                            if self.enemy2lvl[j].x == x and self.enemy2lvl[j].y == y:
+                                return True  # for 2lvl enemies (doesnt let smash enemy not between walls)
+
+                for i in range(self.nOfHardWalls):
+                    if self.walls[i].x == nextX and self.walls[i].y == nextY:
+                        for j in range(self.nOf3LvlEnemies):
+                            if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
+                                return False  # for 3lvl enemies (smash enemy between normal and hard wall)
+                for i in range(self.nOfHardWalls):
+                    if whatObj != "player":
+                        for j in range(self.nOf3LvlEnemies):
+                            if self.enemy3lvl[j].x == x and self.enemy3lvl[j].y == y:
+                                return True  # for 3lvl enemies (doesnt let smash enemy not between normal and hard wall)
+
+                for i in range(self.nOfAllWalls):
+                    if self.walls[i].x == x and self.walls[i].y == y:
+                        if self.level >= self.hardModeLevel and whatObj == "player":  # game over when stepped on yellow
+                            if i < self.nOfHardWalls:  # wall becomes explosive after certain level
+                                self.endGame = True
+                                self.DrawGameOver()
+                                return False
+                        if i < self.nOfSideWalls:
+                            return True
+                        else:
+                            if self.CheckCollision(self.walls[i]):
+                                return True
+                            else:
+                                self.walls[i].MoveWall(direction)
         return False
 
     def ExecuteEnemies(self):
