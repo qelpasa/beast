@@ -101,9 +101,9 @@ class App:
         self.enemy3lvl = []
         self.enemy4lvl = []
 
-        self.init1lvlEnemies = 0
+        self.init1lvlEnemies = 2
         self.init2lvlEnemies = 0
-        self.init3lvlEnemies = 1
+        self.init3lvlEnemies = 0
         self.init4lvlEnemies = 0  # mines
 
         self.nOf1LvlEnemies = self.init1lvlEnemies
