@@ -8,8 +8,6 @@ import random
 # pyxeleditor resources.pyres.pyxres
 
 # TODO
-# level 3 enemy gives error sometimes when moves, doesnt move more than 1 tile (often)
-# level 3 enemy moves after game over
 # cant exit game in main menu
 # some animations of level transitions, to main menu (between screens)
 
@@ -515,6 +513,9 @@ class App:
                 if self.walls[i].x == self.player.x and self.walls[i].y == self.player.y:
                     self.endGame = True
                     self.sound("gameover")
+                    self.nOfEnemies -= self.nOf3LvlEnemies
+                    self.nOf3LvlEnemies = 0
+                    self.enemy3lvl = []
 
         elif self.CheckCollision(obj[whichEnemy], "enemy", EnemyDirection=move):
             obj[whichEnemy].MoveEnemy(move)
