@@ -205,41 +205,41 @@ class App:
         if not self.endGame:
             self.MovePlayer()
             self.ExecuteEnemies()
-        timeThisFrame = []
+            timeThisFrame = []
 
-        for i in range(4):
-            timeThisFrame.append(time.time())
-            self.dt[i] = timeThisFrame[i] - self.timeLastFrame[i]
-            self.timeLastFrame[i] = timeThisFrame[i]
-            self.timeSinceLastMove[i] += self.dt[i]
+            for i in range(4):
+                timeThisFrame.append(time.time())
+                self.dt[i] = timeThisFrame[i] - self.timeLastFrame[i]
+                self.timeLastFrame[i] = timeThisFrame[i]
+                self.timeSinceLastMove[i] += self.dt[i]
 
-        if self.timeSinceLastMove[0] >= self.speedlvl[0]:
-            for i in range(self.nOf1LvlEnemies):
-                if self.parity == 3:  # every third move make move towards player
-                    self.MoveEnemy(i, lvl=1, moveTowardsPlayer=True)
-                    self.parity = 1
-                else:
-                    self.MoveEnemy(i, lvl=1)
-                    self.parity += 1
+            if self.timeSinceLastMove[0] >= self.speedlvl[0]:
+                for i in range(self.nOf1LvlEnemies):
+                    if self.parity == 3:  # every third move make move towards player
+                        self.MoveEnemy(i, lvl=1, moveTowardsPlayer=True)
+                        self.parity = 1
+                    else:
+                        self.MoveEnemy(i, lvl=1)
+                        self.parity += 1
 
-            self.timeSinceLastMove[0] = 0
+                self.timeSinceLastMove[0] = 0
 
-        if self.timeSinceLastMove[1] >= self.speedlvl[1]:
-            for i in range(self.nOf2LvlEnemies):
-                if self.parity == 2:  # every second move make move towards player
-                    self.MoveEnemy(i, lvl=2)
-                    self.parity = 1
-                else:
-                    self.MoveEnemy(i, lvl=2, moveTowardsPlayer=True)
-                    self.parity += 1
+            if self.timeSinceLastMove[1] >= self.speedlvl[1]:
+                for i in range(self.nOf2LvlEnemies):
+                    if self.parity == 2:  # every second move make move towards player
+                        self.MoveEnemy(i, lvl=2)
+                        self.parity = 1
+                    else:
+                        self.MoveEnemy(i, lvl=2, moveTowardsPlayer=True)
+                        self.parity += 1
 
-            self.timeSinceLastMove[1] = 0
+                self.timeSinceLastMove[1] = 0
 
-        if self.timeSinceLastMove[2] >= self.speedlvl[2]:
-            for i in range(self.nOf3LvlEnemies):  # every move towards player
-                self.MoveEnemy(i, lvl=3, moveTowardsPlayer=True)
+            if self.timeSinceLastMove[2] >= self.speedlvl[2]:
+                for i in range(self.nOf3LvlEnemies):  # every move towards player
+                    self.MoveEnemy(i, lvl=3, moveTowardsPlayer=True)
 
-            self.timeSinceLastMove[2] = 0
+                self.timeSinceLastMove[2] = 0
 
         if pyxel.btnp(pyxel.KEY_R):
             self.InitializeObjects()
@@ -808,6 +808,6 @@ class App:
         if what == "gameover":
             pyxel.play(1, 2)
         if what == "enemymove":
-            pyxel.play(1, 3)
+            pyxel.play(2, 3)
 
 App()
