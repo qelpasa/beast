@@ -8,7 +8,6 @@ import random
 # pyxeleditor resources.pyres.pyxres
 
 # TODO
-# cant exit game in main menu
 # some animations of level transitions, to main menu (between screens)
 
 
@@ -174,9 +173,10 @@ class App:
                 self.InitializeObjects()
                 self.menu = False
             elif self.menuButton == 2:
-                print("Authors")
+                pyxel.quit()
             else:
-                quit()  # TODO how to exit??
+                pyxel.run(self.UpdateCreators, self.DrawCreators)
+
 
     def DrawMenu(self):
         pyxel.rect(0, 0, self.gameSizeX, self.gameSizeY, 1)
@@ -195,8 +195,19 @@ class App:
             text3 = 10
 
         pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "NewGame", text1)
-        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Creators", text2)
-        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Press Esc to exit", text3)
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 8, "Exit", text2)
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Creators", text3)
+
+    def DrawCreators(self):
+        pyxel.rect(0, 0, self.gameSizeX, self.gameSizeY, 1)
+
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2 - 20), "Mariusz Witkowski", 10)
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) - 6, "Jakub Chwastek", 10)
+        pyxel.text(int(self.gameSizeX / 2) - 30, int(self.gameSizeY / 2) + 18, "Press ENTER", 7)
+
+    def UpdateCreators(self):
+        if pyxel.btnp(pyxel.KEY_ENTER):
+            pyxel.run(self.UpdateMenu, self.DrawMenu)
 
     def Update(self):
         if self.menu:
